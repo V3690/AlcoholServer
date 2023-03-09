@@ -119,7 +119,7 @@ class UserLoginResource(Resource):
         
         # 1. 클라이언트가 보낸 데이터를 받는다.
         data = request.get_json()
-
+        
         # 2. DB 로부터 해당 유저의 데이터를 가져온다.
         try :
             connection = get_connection()
@@ -155,8 +155,12 @@ class UserLoginResource(Resource):
 
         # 4. id를 jwt 토큰을 만들어서 클라이언트에게 보낸다.
         acces_token = create_access_token(identity=result_list[0]['id'] ) # identity는 토큰에 담길 내용이다. # 담을게 여러개면 딕셔너리 형태로담는다.
+        
+        print(result_list[0]['nickname'])
+        print(result_list[0]['percent'])
 
-        return {'access_token': acces_token}, 200 # 200은 성공했다는 의미의 코드
+
+        return {'nickname' : result_list[0]['nickname'], 'percent' : result_list[0]['percent'],'access_token': acces_token}, 200 # 200은 성공했다는 의미의 코드
 
 
 
@@ -174,39 +178,6 @@ class UserLogoutResource(Resource) :
         jwt_blocklist.add(jti) # 로그아웃된 토큰을 저장한다.
 
         return {'result' : '로그아웃 성공'}, 200
-
-    # todo : 유저 정보 가져오기(내정보 가져오기)
-    @jwt_required() 
-    def get(self) :
-
-        user_id = get_jwt_identity() # 토큰에 담긴 id를 가져온다.
-        
-        try :
-            connection = get_connection() 
-
-            query = '''select email, nickname
-                    from users
-                    where id = %s;'''
-                   
-            record = (user_id,)
-            cursor = connection.cursor(dictionary=True)
-            cursor.execute(query,record)
-
-            result = cursor.fetchall()
-
-            cursor.close()
-            connection.close()
-
-        except Error as e :
-            print(e)
-            cursor.close()
-            connection.close()
-            return {"result": "fail", "error" : str(e)}, 500
-
-        if len(result) == 0 :
-            return {"result": "fail", "error" : "존재하지 않는 유저입니다."}, 400
-
-        return {"result": "success", "user" : result[0] }, 200
 
 
 # 신규 취향 정보를 POST로 받아서 DB에 저장한다.
@@ -229,30 +200,131 @@ class UserResource(Resource) :
 # 도수     
 # percent # tynyint
 
-        # DB에 저장한다.
-        pass 
-        # try :
-        #     connection = get_connection() 
+        # 클라이언트로부터 받은 데이터는 다음과 같다.
+        # {
+        #     "alcoholType": "1,2,3,4,5,6",
+        #     "withs": "1,2,3,4,5,6",
+        #     "percent": "50"
+        # }
+      
+        alcohol_types = data['alcoholType'].split(',')
+        withs = data['withs'].split(',')
+        percent = data['percent']
 
-        #     query = '''INSERT INTO users (email, password, nickname)
-        #             VALUES (%s, %s, %s);'''
-                   
-        #     record = (data['email'], data['password'], data['nickname'])
-        #     cursor = connection.cursor()
-        #     cursor.execute(query,record)
-        #     connection.commit()
+        try:
+            connection = get_connection()
+            cursor = connection.cursor()
 
-        #     cursor.close()
-        #     connection.close()
+            for alcohol_type in alcohol_types:
+                cursor.execute(
+                    "INSERT INTO usersAlcoholType (userId, alcoholTypeId) VALUES (%s, %s)",
+                    (user_id, alcohol_type)
+                )
 
-        # except Error as e :
-        #     print(e)
-        #     cursor.close()
-        #     connection.close()
-        #     return {"result": "fail", "error" : str(e)}, 500
+            for with_id in withs:
+                cursor.execute(
+                    "INSERT INTO usersWiths (userId, withsId) VALUES (%s, %s)",
+                    (user_id, with_id)
+                )
 
-        # return {"result": "success"}, 200
+            cursor.execute(
+                "UPDATE users SET percent = %s WHERE id = %s",
+                (percent, user_id)
+            )
 
-    
+            connection.commit()
+            return {"result": "success"}, 200
+
+        # 오류가 발생한 경우 데이터베이스 트랜잭션에 롤백을 추가
+        except Error as e:
+            print(e)
+            connection.rollback() 
+            return {"result": "fail", "error": str(e)}, 500
+
+        # 오류 발생 여부에 관계없이 데이터베이스 커서 및 연결을 닫는 블록
+        finally:
+            cursor.close()
+            connection.close()
+
+            
+# 유저의 개인정보 페이지 (화면기획서 10번)
+class UserDetailResource(Resource) :
+      
+      # 유저가 닉네임을 수정하면 호출되는 API
+    @jwt_required()
+    def put(self) :
+            # 클라이언트가 보낸 데이터를 받는다.
+            data = request.get_json()
+            # {
+            #     "nickname": "바꾼닉네임"
+            # }
+            user_id = get_jwt_identity()
+            print(data)
+            try:
+                # 닉네임은 중복을 허용하지 않기때문에 DB에 해당 닉네임이 있는지 체크한다.
+                connection = get_connection()
+                cursor = connection.cursor(dictionary=True)
+                cursor.execute(
+                    "SELECT * FROM users WHERE nickname = %s",
+                    (data['nickname'],)
+                )
+                result_list = cursor.fetchall()
+                print(result_list)
+                if len(result_list) > 0 :
+                    return {"result": "fail", "error": "중복된 닉네임입니다."}, 500
+                
+                cursor.execute(
+                    "UPDATE users SET nickname = %s WHERE id = %s",
+                    (data['nickname'], user_id)
+                )
+                connection.commit()
+                return {"result": "success"}, 200
+
+            except Error as e:
+                print(e)
+                connection.rollback() 
+                return {"result": "fail", "error": str(e)}, 500
+            
+            finally:
+                cursor.close()
+                connection.close()
+
+    # 유저가 탈퇴하면 호출되는 API
+    @jwt_required()
+    def delete(self) :
+
+        user_id = get_jwt_identity()
+        try:
+            connection = get_connection()
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(
+                "DELETE FROM users WHERE id = %s",
+                (user_id,)
+            )
+            connection.commit()
+            
+            jti = get_jwt()['jti'] 
+        
+            jwt_blocklist.add(jti) 
+
+            return {"result": "success"}, 200
+        
+        except Error as e:
+            print(e)
+            connection.rollback() 
+            return {"result": "fail", "error": str(e)}, 500
+        
+        finally:
+            cursor.close()
+            connection.close()
+
+        
+      
+
+          
+      
+
+
+
 
 
