@@ -4,7 +4,7 @@ from flask_jwt_extended import JWTManager
 from config import Config
 from resource.alcohol import AlcoholListResource, AlcoholRequestResource, AlcoholResource
 from resource.emotion import RekognitionEmotionResource
-from resource.recipe import RecipeHonorListResource, RecipeLikeListResource, RecipeMasterListResource
+from resource.recipe import RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource
 from resource.user import UserLoginResource, UserLogoutResource, UserRegisterResource, UserResource, jwt_blocklist, UserDetailResource
 
 
@@ -37,6 +37,8 @@ api.add_resource(RekognitionEmotionResource, '/emotion')
 api.add_resource(RecipeMasterListResource, '/recipe/master')
 api.add_resource(RecipeHonorListResource, '/recipe/honor')
 api.add_resource(RecipeLikeListResource, '/recipe/favorite')
+api.add_resource(RecipeLikeSearchResource, '/recipe/favorite/search')
+
 
 if __name__ == '__main__': 
     app.debug = True

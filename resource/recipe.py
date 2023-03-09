@@ -14,17 +14,17 @@ class RecipeMasterListResource(Resource):
     # 불러온 레시피의 id, title, imgUrl을 리턴한다.
     @jwt_required()
     def get(self):
+        offset = request.args.get('offset')
         limit = request.args.get('limit')
-        print(limit)
         try:
             conn = get_connection()
             cursor = conn.cursor(dictionary=True)
-            query = "SELECT id, title, imgUrl FROM recipe WHERE userId = 1 ORDER BY RAND() LIMIT " + limit + ";"
+            query = "SELECT id, title, imgUrl FROM recipe WHERE userId = 1 ORDER BY RAND() LIMIT " + offset + ", " + limit + ";"
             cursor.execute(query)
             rows = cursor.fetchall()
             return {'result' : 'success', 'items' : rows, 'count' : len(rows)}, 200
+    
         except Error as e:
-            print(e)
             return {'error' : str(e)}, 500
         finally:
             cursor.close()
@@ -39,6 +39,7 @@ class RecipeMasterListResource(Resource):
 class RecipeHonorListResource(Resource):
     @jwt_required()
     def get(self):
+        offset = request.args.get('offset')
         limit = request.args.get('limit')
         try:
             conn = get_connection()
@@ -49,7 +50,7 @@ class RecipeHonorListResource(Resource):
             ON r.id = l.recipeId 
             WHERE DATE_SUB(CURDATE(), INTERVAL 2 WEEK) <= r.createdAt 
             GROUP BY r.id ORDER BY likeCount DESC 
-            LIMIT """ + limit + ";"
+            LIMIT """ + offset + ", " + limit + ";"
             # DATE_SUB(CURDATE(), INTERVAL 2 WEEK) <= r.createdAt GROUP BY r.id ORDER BY likeCount
             # 2. 현재시간에서 2주전보다 크거나 같은 레코드를 조회한다.
             # 3. recipe 테이블의 id를 기준으로 그룹핑한다.
@@ -58,7 +59,6 @@ class RecipeHonorListResource(Resource):
             rows = cursor.fetchall()
             return {'result' : 'success', 'items' : rows, 'count' : len(rows)}, 200
         except Error as e:
-            print(e)
             return {'error' : str(e)}, 500
         finally:
             cursor.close()
@@ -85,36 +85,38 @@ class RecipeLikeListResource(Resource):
     def get(self):
         # 쿼리스트링으로 받은 값들을 변수에 저장한다.
         # sort는 정렬 기준이다.
-        # sort = 1 : 최신순
-        # sort = 2 : 인기순
+        # order = 1 : 최신순
+        # order = 2 : 인기순
         # type은 레시피의 타입이다.
         # type = 1 : 전체 레시피
         # type = 2 : 공식 레시피
         # type = 3 : 창작 레시피
         # strength는 레시피의 도수이다.
+        # strength = 0 : 전체
         # strength = 1 : 약
         # strength = 2 : 중
         # strength = 3 : 강
         # strength = 4 : ?
         # limit은 불러올 레시피의 갯수이다.
         
-        # 경우의 수는 2 * 3 * 4 = 24가지이다.
+        # 경우의 수는 2 * 3 * 5 = 30가지이다.
         # 즉, 24개의 쿼리문을 작성해야한다.
         # TODO : 이를 줄이는 방법은 쿼리스트링으로 받은 값들을 조합하여 쿼리문을 작성하는 것이다. (고민해봐야할듯)
         # 중복되는 값을 객체화 시키고, 
         # 반복되는 작업을 함수로 만들고, 
         # 정렬 알고리즘을 사용하여 쿼리문을 작성하는 방법이 있을것같다
 
-        sort = request.args.get('sort')
+        order = request.args.get('order')
         type = request.args.get('type')
         strength = request.args.get('strength')
         limit = request.args.get('limit')
+        offset = request.args.get('offset')
         userId = get_jwt_identity()
         try:
             conn = get_connection()
             cursor = conn.cursor(dictionary=True)
             # 정렬 기준이 최신순인 경우
-            if sort == '1':
+            if order == '1':
                 # 전체 레시피를 불러올 경우
                 if type == '1':
                     # 전체 도수를 불러올 경우
@@ -124,7 +126,7 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r LEFT JOIN likeRecipe l 
                         ON r.id = l.recipeId 
                         WHERE l.userId = """ + str(userId) + """
-                        ORDER BY r.createdAt DESC LIMIT """ + limit + ";"
+                        ORDER BY r.createdAt DESC LIMIT """ + offset + ", " + limit + ";"
                     # 도수가 약인 경우
                     if strength == '1':
                         query = """
@@ -132,7 +134,7 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r LEFT JOIN likeRecipe l 
                         ON r.id = l.recipeId 
                         WHERE l.userId = """ + str(userId) + """ AND r.percent = 1 
-                        ORDER BY r.createdAt DESC LIMIT """ + limit + ";"
+                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 중인 경우
                     elif strength == '2':
                         query = """
@@ -140,7 +142,7 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r LEFT JOIN likeRecipe l 
                         ON r.id = l.recipeId 
                         WHERE l.userId = """ + str(userId) + """ AND r.percent = 2 
-                        ORDER BY r.createdAt DESC LIMIT """ + limit + ";"
+                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 강인 경우
                     elif strength == '3':
                         query = """
@@ -148,7 +150,7 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r LEFT JOIN likeRecipe l 
                         ON r.id = l.recipeId 
                         WHERE l.userId = """ + str(userId) + """ AND r.percent = 3 
-                        ORDER BY r.createdAt DESC LIMIT """ + limit + ";"
+                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 ?인 경우
                     elif strength == '4':
                         query = """
@@ -156,7 +158,7 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r LEFT JOIN likeRecipe l 
                         ON r.id = l.recipeId 
                         WHERE l.userId = """ + str(userId) + """ AND r.percent >= 4 
-                        ORDER BY r.createdAt DESC LIMIT """ + limit + ";"
+                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
                 # 공식 레시피를 불러올 경우
                 elif type == '2':
                     # 전체 도수를 불러올 경우
@@ -166,7 +168,7 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r LEFT JOIN likeRecipe l 
                         ON r.id = l.recipeId 
                         WHERE l.userId = """ + str(userId) + """ AND r.userId = 1
-                        ORDER BY r.createdAt DESC LIMIT """ + limit + ";"
+                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 약인 경우
                     if strength == '1':
                         query = """
@@ -174,7 +176,7 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r LEFT JOIN likeRecipe l
                         ON r.id = l.recipeId
                         WHERE l.userId = """ + str(userId) + """ AND r.percent = 1 AND r.userId = 1
-                        ORDER BY r.createdAt DESC LIMIT """ + limit + ";"
+                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 중인 경우
                     elif strength == '2':
                         query = """
@@ -182,7 +184,7 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r LEFT JOIN likeRecipe l 
                         ON r.id = l.recipeId 
                         WHERE l.userId = """ + str(userId) + """ AND r.percent = 2 AND r.userId = 1
-                        ORDER BY r.createdAt DESC LIMIT """ + limit + ";"
+                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 강인 경우
                     elif strength == '3':
                         query = """
@@ -190,7 +192,7 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r LEFT JOIN likeRecipe l
                         ON r.id = l.recipeId
                         WHERE l.userId = """ + str(userId) + """ AND r.percent = 3 AND r.userId = 1
-                        ORDER BY r.createdAt DESC LIMIT """ + limit + ";"
+                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 ?인 경우
                     elif strength == '4':
                         query = """
@@ -198,7 +200,7 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r LEFT JOIN likeRecipe l
                         ON r.id = l.recipeId
                         WHERE l.userId = """ + str(userId) + """ AND r.percent = 4 AND r.userId = 1
-                        ORDER BY r.createdAt DESC LIMIT """ + limit + ";"
+                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
                 # 창작 레시피를 불러올 경우
                 elif type == '3':
                     # 전체 도수를 불러올 경우
@@ -208,7 +210,7 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r LEFT JOIN likeRecipe l
                         ON r.id = l.recipeId
                         WHERE l.userId = """ + str(userId) + """ AND r.userId != 1
-                        ORDER BY r.createdAt DESC LIMIT """ + limit + ";"
+                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 약인 경우
                     if strength == '1':
                         query = """
@@ -216,7 +218,7 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r LEFT JOIN likeRecipe l
                         ON r.id = l.recipeId
                         WHERE l.userId = """ + str(userId) + """ AND r.percent = 1 AND r.userId != 1
-                        ORDER BY r.createdAt DESC LIMIT """ + limit + ";"
+                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 중인 경우
                     elif strength == '2':
                         query = """
@@ -224,7 +226,7 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r LEFT JOIN likeRecipe l
                         ON r.id = l.recipeId
                         WHERE l.userId = """ + str(userId) + """ AND r.percent = 2 AND r.userId != 1
-                        ORDER BY r.createdAt DESC LIMIT """ + limit + ";"
+                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 강인 경우
                     elif strength == '3':
                         query = """
@@ -232,7 +234,7 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r LEFT JOIN likeRecipe l
                         ON r.id = l.recipeId
                         WHERE l.userId = """ + str(userId) + """ AND r.percent = 3 AND r.userId != 1
-                        ORDER BY r.createdAt DESC LIMIT """ + limit + ";"
+                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 ?인 경우
                     elif strength == '4':
                         query = """
@@ -240,9 +242,9 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r LEFT JOIN likeRecipe l
                         ON r.id = l.recipeId
                         WHERE l.userId = """ + str(userId) + """ AND r.percent = 4 AND r.userId != 1
-                        ORDER BY r.createdAt DESC LIMIT """ + limit + ";"
+                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
             # 정렬 기준이 인기순인 경우
-            elif sort == '2':
+            elif order == '2':
                 # 전체 레시피를 불러올 경우
                 if type == '1':
                     # 전체도수를 불러올 경우
@@ -254,7 +256,7 @@ class RecipeLikeListResource(Resource):
                         LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(userId) + """
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
                         GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """ + limit + ";"
+                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 약인 경우
                     if strength == '1':
                         query = """
@@ -265,7 +267,7 @@ class RecipeLikeListResource(Resource):
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
                         WHERE r.percent <= 1
                         GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """ + limit + ";" 
+                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";" 
                     # 도수가 중인 경우
                     elif strength == '2':
                         query = """
@@ -276,7 +278,7 @@ class RecipeLikeListResource(Resource):
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
                         WHERE r.percent <= 2
                         GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """ + limit + ";" 
+                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";" 
                     # 도수가 강인 경우
                     elif strength == '3':
                         query = """
@@ -287,7 +289,7 @@ class RecipeLikeListResource(Resource):
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
                         WHERE r.percent <= 3
                         GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """ + limit + ";" 
+                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";" 
                     # 도수가 ?인 경우
                     elif strength == '4':
                         query = """
@@ -298,7 +300,7 @@ class RecipeLikeListResource(Resource):
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
                         WHERE r.percent <= 4
                         GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """ + limit + ";" 
+                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";" 
                 # 공식 레시피를 불러올 경우
                 elif type == '2':
                     # 전체도수를 불러올 경우
@@ -310,7 +312,7 @@ class RecipeLikeListResource(Resource):
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
                         WHERE r.userId = 1  and r.userId = 1
                         GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """ + limit + ";"
+                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 약인 경우
                     if strength == '1':
                         query = """
@@ -320,7 +322,7 @@ class RecipeLikeListResource(Resource):
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
                         WHERE r.percent = 1 AND r.userId = 1  
                         GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """ + limit + ";"
+                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 중인 경우
                     elif strength == '2':
                         query = """
@@ -330,7 +332,7 @@ class RecipeLikeListResource(Resource):
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
                         WHERE r.percent = 2 AND r.userId = 1  
                         GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """ + limit + ";"
+                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 강인 경우
                     elif strength == '3':
                         query = """
@@ -340,7 +342,7 @@ class RecipeLikeListResource(Resource):
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
                         WHERE r.percent = 3 AND r.userId = 1  
                         GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """ + limit + ";"
+                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 ?인 경우
                     elif strength == '4':
                         query = """
@@ -350,7 +352,7 @@ class RecipeLikeListResource(Resource):
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
                         WHERE r.percent = 4 AND r.userId = 1  
                         GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """ + limit + ";"
+                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
                 # 창작 레시피를 불러올 경우
                 elif type == '3':
                     # 전체도수를 불러올 경우
@@ -362,7 +364,7 @@ class RecipeLikeListResource(Resource):
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
                         WHERE r.userId <> 1 
                         GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """ + limit + ";"
+                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 약인 경우
                     if strength == '1':
                         query = """
@@ -372,7 +374,7 @@ class RecipeLikeListResource(Resource):
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
                         WHERE r.percent = 1 AND r.userId <> 1  
                         GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """ + limit + ";"
+                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 중인 경우
                     elif strength == '2':
                         query = """
@@ -382,7 +384,7 @@ class RecipeLikeListResource(Resource):
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
                         WHERE r.percent = 2 AND r.userId <> 1  
                         GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """ + limit + ";"
+                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 강인 경우
                     elif strength == '3':
                         query = """
@@ -392,7 +394,7 @@ class RecipeLikeListResource(Resource):
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
                         WHERE r.percent = 3 AND r.userId <> 1  
                         GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """ + limit + ";"
+                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
                     # 도수가 ?인 경우
                     elif strength == '4':
                         query = """
@@ -402,7 +404,7 @@ class RecipeLikeListResource(Resource):
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
                         WHERE r.percent = 4 AND r.userId <> 1  
                         GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """ + limit + ";"
+                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
 
             # 쿼리를 실행하고 결과를 저장
             cursor.execute(query)
@@ -418,6 +420,39 @@ class RecipeLikeListResource(Resource):
             cursor.close()
 
 
+# 즐겨찾는 레시피 중에서 사용자가 입력한 키워드를 포함하는 레시피를 검색
+class RecipeLikeSearchResource(Resource):
+    @jwt_required()
+    def get(self):
+         # 사용자가 입력한 키워드를 가져온다
+        keyword = request.args.get('keyword')
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+        user_id = get_jwt_identity()
+        try:
+            conn = get_connection()
+            cursor = conn.cursor(dictionary=True)
+            # 사용자가 입력한 키워드를 포함하는 레시피를 검색
+            query = """
+            SELECT r.id, r.title, r.percent, COUNT(l1.recipeId) AS likeCount
+            FROM recipe r 
+            LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(user_id) + """
+            LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
+            WHERE r.id IN (SELECT recipeId FROM likeRecipe WHERE userId = """ + str(user_id) + """ ) AND r.title LIKE '%""" + keyword + """%'
+            GROUP BY r.id
+            ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
+            # 쿼리를 실행하고 결과를 저장   
+            cursor.execute(query)
+            result = cursor.fetchall()
+            return {"result": result, "count" : len(result)}, 200
+        
+        except Exception as e:
+            print(e)
+            return ("errer" + str(e)), 500
+        
+        finally:
+            conn.close()
+            cursor.close()
 
 
 
