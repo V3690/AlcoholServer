@@ -2,8 +2,10 @@ from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from config import Config
-from resource.user import UserLoginResource, UserLogoutResource, UserRegisterResource, UserResource, jwt_blocklist
-
+from resource.alcohol import AlcoholListResource, AlcoholRequestResource, AlcoholResource
+from resource.emotion import RekognitionEmotionResource
+from resource.recipe import RecipeHonorListResource, RecipeLikeListResource, RecipeMasterListResource
+from resource.user import UserLoginResource, UserLogoutResource, UserRegisterResource, UserResource, jwt_blocklist, UserDetailResource
 
 
 
@@ -18,16 +20,23 @@ def check_if_token_is_revoked(jwt_header, jwt_payload): # 토큰이 만료되었
     jti = jwt_payload['jti'] # jti는 JWT 토큰의 고유 식별자
     return jti in jwt_blocklist 
 
-# 회원가입, 로그인, 로그아웃 엔드포인트
+# 회원가입, 로그인, 로그아웃, 신규회원취향 , 내정보 엔드포인트
 api.add_resource(UserRegisterResource, '/user/register') 
 api.add_resource(UserLoginResource, '/user/login')
 api.add_resource(UserLogoutResource, '/user/logout')
 api.add_resource(UserResource, '/user/preference')
+api.add_resource(UserDetailResource, '/user/detail') 
 
 # 경로와 리소스(API코드)를 연결한다.
+api.add_resource(AlcoholRequestResource, '/alcohol/request')
+api.add_resource(AlcoholListResource, '/alcohol')
+api.add_resource(AlcoholResource, '/alcohol/<int:alcohol_id>')
+api.add_resource(RekognitionEmotionResource, '/emotion')
 
-
-
+# 레시피 (주인장추천, 명예 주인장, 즐겨찾기) 엔드포인트
+api.add_resource(RecipeMasterListResource, '/recipe/master')
+api.add_resource(RecipeHonorListResource, '/recipe/honor')
+api.add_resource(RecipeLikeListResource, '/recipe/favorite')
 
 if __name__ == '__main__': 
     app.debug = True
