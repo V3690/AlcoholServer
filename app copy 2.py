@@ -1,9 +1,8 @@
 from flask import Flask 
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
-from resource.recipe copycopy import RecipeResource
-from resource.recipe copycopy import RecipeMyListResource
-from resource.recipe copycopy import RecipeUserListResource
+
+
 from config import Config
 from resource.alcohol import AlcoholListResource, AlcoholRequestResource, AlcoholResource
 from resource.emotion import RekognitionEmotionResource
@@ -41,10 +40,11 @@ api.add_resource(RecipeMasterListResource, '/recipe/master')
 api.add_resource(RecipeHonorListResource, '/recipe/honor')
 api.add_resource(RecipeLikeListResource, '/recipe/favorite')
 
-# 레시피 주인장전체목록,유저전체목록,내가만든전체목록,세부레시피조회
-api.add_resource(RecipeMasterListResource,'recipe/Master')
-api.add_resource(RecipeUserListResource,'/recipe/<int:user_id>')
+# 레시피 주인장전체목록,유저전체목록,주인장+유저전체목록, 내가만든전체목록,세부레시피조회
+api.add_resource(RecipeMasterallListResource,'recipe/Masterall')
+api.add_resource(RecipeUserListResource,'/recipe/user')
 api.add_resource(RecipeMyListResource,'/recipe/me')
+api.add_resource(RecipeAllListResource,'/recipe/all')
 api.add_resource(RecipeResource, '/recipe/user/<int:recipe_id>')
 
 if __name__ == '__main__': 
