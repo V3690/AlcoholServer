@@ -5,6 +5,7 @@ from config import Config
 from resource.alcohol import AlcoholListResource, AlcoholRequestResource, AlcoholResource
 from resource.emotion import RekognitionEmotionResource
 from resource.recipe import RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource
+from resource.recipe2 import IngredientSearch, recipeIngredient
 from resource.user import UserLoginResource, UserLogoutResource, UserRegisterResource, UserResource, jwt_blocklist, UserDetailResource
 
 
@@ -38,6 +39,10 @@ api.add_resource(RecipeMasterListResource, '/recipe/master')
 api.add_resource(RecipeHonorListResource, '/recipe/honor')
 api.add_resource(RecipeLikeListResource, '/recipe/favorite')
 api.add_resource(RecipeLikeSearchResource, '/recipe/favorite/search')
+
+# 부재료 검색 및 부재료 목록
+api.add_resource(IngredientSearch,'/ingredient/search')
+api.add_resource(recipeIngredient,'/ingredient')
 
 
 if __name__ == '__main__': 
