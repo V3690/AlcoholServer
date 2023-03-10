@@ -3,7 +3,7 @@ from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from config import Config
 from resource.alcohol import AlcoholListResource, AlcoholRequestResource, AlcoholResource
-from resource.emotion import RekognitionEmotionResource
+from resource.game import RekognitionEmotionResource, DiceResource
 from resource.recipe import RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource
 from resource.user import UserLoginResource, UserLogoutResource, UserRegisterResource, UserResource, jwt_blocklist, UserDetailResource
 
@@ -31,7 +31,10 @@ api.add_resource(UserDetailResource, '/user/detail')
 api.add_resource(AlcoholRequestResource, '/alcohol/request')
 api.add_resource(AlcoholListResource, '/alcohol')
 api.add_resource(AlcoholResource, '/alcohol/<int:alcohol_id>')
-api.add_resource(RekognitionEmotionResource, '/emotion')
+
+api.add_resource(RekognitionEmotionResource, '/game/emotion')
+api.add_resource(DiceResource, '/game/dice/<int:penaltyType_id>')
+
 
 # 레시피 (주인장추천, 명예 주인장, 즐겨찾기) 엔드포인트
 api.add_resource(RecipeMasterListResource, '/recipe/master')
