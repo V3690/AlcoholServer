@@ -69,7 +69,7 @@ class RekognitionEmotionResource(Resource) :
 
         try :
             connection = get_connection()
-            query = '''select a.id as alcoholId, a.name, ea.emotionId, e.name as emotion
+            query = '''select a.id as alcoholId, a.name, ea.emotionId, e.name as emotion, ea.content
                     from alcohol a
                     join emotionAlcohol ea
                     on a.id = ea.alcoholId
@@ -102,3 +102,68 @@ class RekognitionEmotionResource(Resource) :
         
         # return { "result" : "success" ,
         #         "alcohol" : emotion_result[random_num] }, 200
+
+
+# 주사위 게임 API
+# penaltyType_id : 1 , 벌칙
+# penaltyType_id : 2 , 벌주
+# penaltyType_id : 1 , 벌칙 + 벌주 중 랜덤으로 하나
+class DiceResource(Resource):
+    @jwt_required()
+    def get(self, penaltyType_id) :
+        try :
+
+            if penaltyType_id == 1 or penaltyType_id == 2:
+
+
+                connection = get_connection()
+                query = '''select * from dicePenalty
+                        where penaltyType = %s;'''
+                                    
+                record = (penaltyType_id, )
+                cursor = connection.cursor(dictionary= True)
+                cursor.execute(query, record)
+
+                action_list = cursor.fetchall()
+
+                if action_list[0]['id'] is None :
+                    return{'error' : '잘못된 알콜 아이디 입니다.'}, 400
+                
+            elif penaltyType_id == 3:
+                connection = get_connection()
+                query = '''select * from dicePenalty;'''
+                                    
+                # record = (penaltyType_id, )
+                cursor = connection.cursor(dictionary= True)
+                cursor.execute(query, )
+
+            #     cursor = connection.cursor(dictionary=True)
+            #     cursor.execute(query, 
+
+                action_list = cursor.fetchall()
+
+
+            query = '''select * from diceSubject;'''
+            
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query, )
+
+            subject_list = cursor.fetchall()
+
+            cursor.close()
+            connection.close()
+
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+        
+        # print(subject_list[random.randint( 1, len(subject_list) -1 )]['subject'])
+        
+        # print("subject_list : " + str(len(subject_list)))
+        # print("action_list : " + str(len(action_list)))
+        
+        return { "result" : "success" ,
+                "subject": subject_list[random.randint( 1, len(subject_list) -1 )]['subject'],
+                "alcohol" : action_list[random.randint( 1, len(action_list) -1 )]['action']}, 200

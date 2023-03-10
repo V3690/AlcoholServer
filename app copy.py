@@ -4,7 +4,7 @@ from flask_jwt_extended import JWTManager
 from config import Config
 from resource.user import UserLoginResource, UserLogoutResource, UserRegisterResource, UserResource, jwt_blocklist
 from resource.alcohol import AlcoholRequestResource, AlcoholListResource, AlcoholResource
-from resource.emotion import RekognitionEmotionResource
+from resource.game import RekognitionEmotionResource
 
 
 app = Flask(__name__)
