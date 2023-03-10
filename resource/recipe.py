@@ -127,37 +127,12 @@ class RecipeLikeListResource(Resource):
                         ON r.id = l.recipeId 
                         WHERE l.userId = """ + str(userId) + """
                         ORDER BY r.createdAt DESC LIMIT """ + offset + ", " + limit + ";"
-                    # 도수가 약인 경우
-                    if strength == '1':
+                    if strength != '0':
                         query = """
                         SELECT r.id, r.title, r.percent
                         FROM recipe r LEFT JOIN likeRecipe l 
                         ON r.id = l.recipeId 
-                        WHERE l.userId = """ + str(userId) + """ AND r.percent = 1 
-                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 중인 경우
-                    elif strength == '2':
-                        query = """
-                        SELECT r.id, r.title, r.percent
-                        FROM recipe r LEFT JOIN likeRecipe l 
-                        ON r.id = l.recipeId 
-                        WHERE l.userId = """ + str(userId) + """ AND r.percent = 2 
-                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 강인 경우
-                    elif strength == '3':
-                        query = """
-                        SELECT r.id, r.title, r.percent
-                        FROM recipe r LEFT JOIN likeRecipe l 
-                        ON r.id = l.recipeId 
-                        WHERE l.userId = """ + str(userId) + """ AND r.percent = 3 
-                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 ?인 경우
-                    elif strength == '4':
-                        query = """
-                        SELECT r.id, r.title, r.percent
-                        FROM recipe r LEFT JOIN likeRecipe l 
-                        ON r.id = l.recipeId 
-                        WHERE l.userId = """ + str(userId) + """ AND r.percent >= 4 
+                        WHERE l.userId = """ + str(userId) + """ AND r.percent = """ + strength + """
                         ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
                 # 공식 레시피를 불러올 경우
                 elif type == '2':
@@ -169,37 +144,12 @@ class RecipeLikeListResource(Resource):
                         ON r.id = l.recipeId 
                         WHERE l.userId = """ + str(userId) + """ AND r.userId = 1
                         ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 약인 경우
-                    if strength == '1':
+                    if strength != '0':
                         query = """
                         SELECT r.id, r.title, r.percent
                         FROM recipe r LEFT JOIN likeRecipe l
                         ON r.id = l.recipeId
-                        WHERE l.userId = """ + str(userId) + """ AND r.percent = 1 AND r.userId = 1
-                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 중인 경우
-                    elif strength == '2':
-                        query = """
-                        SELECT r.id, r.title, r.percent
-                        FROM recipe r LEFT JOIN likeRecipe l 
-                        ON r.id = l.recipeId 
-                        WHERE l.userId = """ + str(userId) + """ AND r.percent = 2 AND r.userId = 1
-                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 강인 경우
-                    elif strength == '3':
-                        query = """
-                        SELECT r.id, r.title, r.percent
-                        FROM recipe r LEFT JOIN likeRecipe l
-                        ON r.id = l.recipeId
-                        WHERE l.userId = """ + str(userId) + """ AND r.percent = 3 AND r.userId = 1
-                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 ?인 경우
-                    elif strength == '4':
-                        query = """
-                        SELECT r.id, r.title, r.percent
-                        FROM recipe r LEFT JOIN likeRecipe l
-                        ON r.id = l.recipeId
-                        WHERE l.userId = """ + str(userId) + """ AND r.percent = 4 AND r.userId = 1
+                        WHERE l.userId = """ + str(userId) + """ AND r.percent = """ + strength + """ AND r.userId = 1
                         ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
                 # 창작 레시피를 불러올 경우
                 elif type == '3':
@@ -211,37 +161,12 @@ class RecipeLikeListResource(Resource):
                         ON r.id = l.recipeId
                         WHERE l.userId = """ + str(userId) + """ AND r.userId != 1
                         ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 약인 경우
-                    if strength == '1':
+                    if strength != '0':
                         query = """
                         SELECT r.id, r.title, r.percent
                         FROM recipe r LEFT JOIN likeRecipe l
                         ON r.id = l.recipeId
-                        WHERE l.userId = """ + str(userId) + """ AND r.percent = 1 AND r.userId != 1
-                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 중인 경우
-                    elif strength == '2':
-                        query = """
-                        SELECT r.id, r.title, r.percent
-                        FROM recipe r LEFT JOIN likeRecipe l
-                        ON r.id = l.recipeId
-                        WHERE l.userId = """ + str(userId) + """ AND r.percent = 2 AND r.userId != 1
-                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 강인 경우
-                    elif strength == '3':
-                        query = """
-                        SELECT r.id, r.title, r.percent
-                        FROM recipe r LEFT JOIN likeRecipe l
-                        ON r.id = l.recipeId
-                        WHERE l.userId = """ + str(userId) + """ AND r.percent = 3 AND r.userId != 1
-                        ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 ?인 경우
-                    elif strength == '4':
-                        query = """
-                        SELECT r.id, r.title, r.percent
-                        FROM recipe r LEFT JOIN likeRecipe l
-                        ON r.id = l.recipeId
-                        WHERE l.userId = """ + str(userId) + """ AND r.percent = 4 AND r.userId != 1
+                        WHERE l.userId = """ + str(userId) + """ AND r.percent = """ + strength + """ AND r.userId != 1
                         ORDER BY r.createdAt DESC LIMIT """+ offset + ", " + limit + ";"
             # 정렬 기준이 인기순인 경우
             elif order == '2':
@@ -251,56 +176,25 @@ class RecipeLikeListResource(Resource):
                     if strength == '0':
                         query = """
                         SELECT r.id, r.title, r.percent, COUNT(l1.recipeId) AS likeCount
-                        FROM recipe r LEFT JOIN likeRecipe l
-                        ON r.id = l.recipeId
-                        LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(userId) + """
-                        LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
-                        GROUP BY r.id
+                        FROM recipe r 
+                        LEFT JOIN likeRecipe l1 
+                        ON r.id = l1.recipeId and l1.userId = """ + str(userId) + """
+                        left join likeRecipe l2
+                        on r.id = l2.recipeId
+                        WHERE l1.userId = """ + str(userId) + """
+                        GROUP BY r.id, r.title, r.percent 
                         ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 약인 경우
-                    if strength == '1':
+                    if strength != '0':
                         query = """
                         SELECT r.id, r.title, r.percent, COUNT(l1.recipeId) AS likeCount
-                        FROM recipe r LEFT JOIN likeRecipe l
-                        ON r.id = l.recipeId
-                        LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(userId) + """
-                        LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
-                        WHERE r.percent <= 1
-                        GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";" 
-                    # 도수가 중인 경우
-                    elif strength == '2':
-                        query = """
-                        SELECT r.id, r.title, r.percent, COUNT(l1.recipeId) AS likeCount
-                        FROM recipe r LEFT JOIN likeRecipe l
-                        ON r.id = l.recipeId
-                        LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(userId) + """
-                        LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
-                        WHERE r.percent <= 2
-                        GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";" 
-                    # 도수가 강인 경우
-                    elif strength == '3':
-                        query = """
-                       SELECT r.id, r.title, r.percent, COUNT(l1.recipeId) AS likeCount
-                        FROM recipe r LEFT JOIN likeRecipe l
-                        ON r.id = l.recipeId
-                        LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(userId) + """
-                        LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
-                        WHERE r.percent <= 3
-                        GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";" 
-                    # 도수가 ?인 경우
-                    elif strength == '4':
-                        query = """
-                        SELECT r.id, r.title, r.percent, COUNT(l1.recipeId) AS likeCount
-                        FROM recipe r LEFT JOIN likeRecipe l
-                        ON r.id = l.recipeId
-                        LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(userId) + """
-                        LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
-                        WHERE r.percent <= 4
-                        GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";" 
+                        FROM recipe r 
+                        LEFT JOIN likeRecipe l1 
+                        ON r.id = l1.recipeId and l1.userId = """ + str(userId) + """
+                        left join likeRecipe l2
+                        on r.id = l2.recipeId
+                        WHERE r.percent = """ + strength + """ and l1.userId = """ + str(userId) + """
+                        GROUP BY r.id, r.title, r.percent 
+                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
                 # 공식 레시피를 불러올 경우
                 elif type == '2':
                     # 전체도수를 불러올 경우
@@ -310,47 +204,16 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r 
                         LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(userId) + """
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
-                        WHERE r.userId = 1  and r.userId = 1
+                        WHERE r.userId = 1 and l1.userId = """ + str(userId) + """
                         GROUP BY r.id
                         ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 약인 경우
-                    if strength == '1':
+                    if strength != '0':
                         query = """
                         SELECT r.id, r.title, r.percent, COUNT(l1.recipeId) AS likeCount
                         FROM recipe r 
                         LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(userId) + """
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
-                        WHERE r.percent = 1 AND r.userId = 1  
-                        GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 중인 경우
-                    elif strength == '2':
-                        query = """
-                        SELECT r.id, r.title, r.percent, COUNT(l1.recipeId) AS likeCount
-                        FROM recipe r 
-                        LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(userId) + """
-                        LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
-                        WHERE r.percent = 2 AND r.userId = 1  
-                        GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 강인 경우
-                    elif strength == '3':
-                        query = """
-                        SELECT r.id, r.title, r.percent, COUNT(l1.recipeId) AS likeCount
-                        FROM recipe r 
-                        LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(userId) + """
-                        LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
-                        WHERE r.percent = 3 AND r.userId = 1  
-                        GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 ?인 경우
-                    elif strength == '4':
-                        query = """
-                        SELECT r.id, r.title, r.percent, COUNT(l1.recipeId) AS likeCount
-                        FROM recipe r 
-                        LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(userId) + """
-                        LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
-                        WHERE r.percent = 4 AND r.userId = 1  
+                        WHERE r.percent = """ + strength + """ AND r.userId = 1 and l1.userId = """ + str(userId) + """
                         GROUP BY r.id
                         ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
                 # 창작 레시피를 불러올 경우
@@ -362,50 +225,19 @@ class RecipeLikeListResource(Resource):
                         FROM recipe r 
                         LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(userId) + """
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
-                        WHERE r.userId <> 1 
+                        WHERE r.userId <> 1  and l1.userId = """ + str(userId) + """
                         GROUP BY r.id
                         ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 약인 경우
-                    if strength == '1':
+                    if strength != '0':
                         query = """
                         SELECT r.id, r.title, r.percent, COUNT(l1.recipeId) AS likeCount
                         FROM recipe r 
                         LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(userId) + """
                         LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
-                        WHERE r.percent = 1 AND r.userId <> 1  
+                        WHERE r.percent = """ + strength + """ AND r.userId <> 1 and l1.userId = """ + str(userId) + """
                         GROUP BY r.id
                         ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 중인 경우
-                    elif strength == '2':
-                        query = """
-                        SELECT r.id, r.title, r.percent, COUNT(l1.recipeId) AS likeCount
-                        FROM recipe r 
-                        LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(userId) + """
-                        LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
-                        WHERE r.percent = 2 AND r.userId <> 1  
-                        GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 강인 경우
-                    elif strength == '3':
-                        query = """
-                        SELECT r.id, r.title, r.percent, COUNT(l1.recipeId) AS likeCount
-                        FROM recipe r 
-                        LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(userId) + """
-                        LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
-                        WHERE r.percent = 3 AND r.userId <> 1  
-                        GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
-                    # 도수가 ?인 경우
-                    elif strength == '4':
-                        query = """
-                        SELECT r.id, r.title, r.percent, COUNT(l1.recipeId) AS likeCount
-                        FROM recipe r 
-                        LEFT JOIN likeRecipe l1 ON r.id = l1.recipeId AND l1.userId = """ + str(userId) + """
-                        LEFT JOIN likeRecipe l2 ON r.id = l2.recipeId
-                        WHERE r.percent = 4 AND r.userId <> 1  
-                        GROUP BY r.id
-                        ORDER BY likeCount DESC LIMIT """+ offset + ", " + limit + ";"
-
+               
             # 쿼리를 실행하고 결과를 저장
             cursor.execute(query)
             result = cursor.fetchall()
