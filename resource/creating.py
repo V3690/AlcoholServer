@@ -10,6 +10,8 @@ from config import Config
 
 
 ## 레시피 작성 페이지 ##
+
+
 # 레시피 저장
 class CreatingRecipe(Resource):
     @jwt_required()
@@ -173,6 +175,136 @@ class CreatingRecipeIngredient(Resource):
         finally:
             cursor.close()
             connection.close()
+
+
+
+# 레시피 작성 중 - 술재료 목록
+class CreatingAlcoholList(Resource):
+    @jwt_required()
+    def get(self):
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+        try :
+            connection = get_connection()
+
+            query = '''select id, name from alcohol
+                        limit ''' + offset + ''', '''+ limit + ''';
+                    '''
+            
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query,)
+
+            result_list = cursor.fetchall()
+
+            cursor.close()
+            connection.close()
+    
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+
+        return {"result" : "success" ,
+                "items" : result_list , 
+                "count" : len(result_list)}, 200
+
+# 레시피 작성 중 - 부재료 목록
+class CreatingIngredientList(Resource):
+    @jwt_required()
+    def get(self):
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+        try :
+            connection = get_connection()
+
+            query = '''select id, name from ingredient
+                        limit ''' + offset + ''', '''+ limit + ''';
+                    '''
+            
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query,)
+
+            result_list = cursor.fetchall()
+
+            cursor.close()
+            connection.close()
+    
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+
+        return {"result" : "success" ,
+                "items" : result_list , 
+                "count" : len(result_list)}, 200
+
+
+
+# 레시피 작성 중 - 술재료 검색
+class CreatingSearchAlcohol(Resource):
+    @jwt_required()
+    def get(self):
+    
+        keyword = request.args.get('keyword')
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+
+        try:
+            conn = get_connection()
+            cursor = conn.cursor(dictionary=True)
+            query = """select id, name
+                    from alcohol
+                    where name like '%""" + keyword + """%'
+                    limit """ + offset + """, """+ limit + """;
+                    """
+            cursor.execute(query)
+            result = cursor.fetchall()
+            return {"result": result, "count" : len(result)}, 200
+        
+        except Exception as e:
+            print(e)
+            return ("errer" + str(e)), 500
+        
+        finally:
+            conn.close()
+            cursor.close()
+
+# 레시피 작성 중 - 부재료 검색
+class CreatingSearchIngredient(Resource):
+    @jwt_required()
+    def get(self):
+    
+        keyword = request.args.get('keyword')
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+
+        try:
+            conn = get_connection()
+            cursor = conn.cursor(dictionary=True)
+            query = """select id, name
+                    from ingredient
+                    where name like '%""" + keyword + """%'
+                    limit """ + offset + """, """+ limit + """;
+                    """
+            cursor.execute(query)
+            result = cursor.fetchall()
+            return {"result": result, "count" : len(result)}, 200
+        
+        except Exception as e:
+            print(e)
+            return ("errer" + str(e)), 500
+        
+        finally:
+            conn.close()
+            cursor.close()
+
+
 
 
 # 선택한 술/재료 불러오기 (화면에 나타내기)
