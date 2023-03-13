@@ -34,7 +34,6 @@ class RecipeMasterListResource(Resource):
 # 명예 레시피 리스트를 불러오는 api
 # 최근 2주안의 좋아요를 가장 많이받은 레시피를 불러온다.
 # 레시피의 id, imgUrl, likeCount를 반환한다.
-# 레시피의 likeCount를 기준으로 내림차순 정렬한다.
 # limit은 쿼리스트링으로 받는다.
 class RecipeHonorListResource(Resource):
     @jwt_required()
@@ -287,28 +286,344 @@ class RecipeLikeSearchResource(Resource):
             cursor.close()
 
 
+# 부재료 목록중 검색
+class IngredientSearch(Resource):
+    @jwt_required()
+    def get(self):
+    
+        keyword = request.args.get('keyword')
+        try:
+            conn = get_connection()
+            cursor = conn.cursor(dictionary=True)
+            query = """select name
+                    from ingredient
+                    where name like '%""" + keyword + """%'
+                    UNION
+                    select name from alcohol
+                    where name like
+                    '%""" + keyword + """%'
+                    ; """
+            cursor.execute(query)
+            result = cursor.fetchall()
+            return {"result": result, "count" : len(result)}, 200
+        
+        except Exception as e:
+            print(e)
+            return ("errer" + str(e)), 500
+        
+        finally:
+            conn.close()
+            cursor.close()
+
+#작성중 부재료 목록 가저오기
+class recipeIngredient(Resource):
+    @jwt_required()
+    def get(self):
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+        try :
+            connection = get_connection()
+
+            query = '''select name from ingredient
+                        UNION
+                        select name from alcohol
+                        limit ''' + offset + ''', '''+ limit + ''';
+                    '''
+
+        
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query,)
+
+            result_list = cursor.fetchall()
+
+          
+
+            # i = 0
+            # for row in result_list :
+            #     result_list[i]['createdAt'] = row['createdAt'].isoformat()
+            #     result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
+            #     i = i + 1
+
+            cursor.close()
+            connection.close()
+    
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+
+        return {"result" : "success" ,
+                "items" : result_list , 
+                "count" : len(result_list)}, 200
 
 
 
+#주인장레시피 목록 불러오기
+class RecipeMasterallListResource(Resource):
+    @jwt_required()
+    def get(self) :
+        # user_id = get_jwt_identity()
+
+        order = request.args.get('order')
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+
+        try :
+            connection = get_connection()
+
+            query = '''select r.title, r.percent , count(l.userId) as cnt
+                    from recipe r
+                    left join likeRecipe l
+                    on r.id = l.recipeId
+                    where r.userId= 1
+                    group by r.id
+                    order by ''' + order + '''  desc
+                    limit ''' + offset + ''', '''+ limit + ''';'''
+
+
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(query, )
+
+
+            result_list = cursor.fetchall()
+
+            # i = 0
+            # for row in result_list :
+            #     result_list[i]['avg'] = float(row['avg'])
+            #     i = i + 1
+
+            cursor.close()
+            connection.close()
+
+
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+
+        return {"result" : "success" ,
+                "items" : result_list , 
+                "count" : len(result_list)}, 200
+
+
+# 유저레시피 목록 불러오기
+class RecipeUserListResource(Resource):
+    @jwt_required()
+    def get(self) :
+      
+
+        order = request.args.get('order')
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+        
+
+        try :
+            connection = get_connection()
+
+            query = '''select r.title, r.percent , count(l.userId) as cnt
+                    from recipe r
+                    left join likeRecipe l
+                    on r.id = l.recipeId
+                    where r.userId NOT IN(1)
+                    group by r.id
+                    order by ''' + order + '''  desc
+                    limit ''' + offset + ''', '''+ limit + ''';'''
+
+        
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query,)
+
+            result_list = cursor.fetchall()
+
+          
+
+            # i = 0
+            # for row in result_list :
+            #     result_list[i]['createdAt'] = row['createdAt'].isoformat()
+            #     result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
+            #     i = i + 1
+
+            cursor.close()
+            connection.close()
+    
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+
+        return {"result" : "success" ,
+                "items" : result_list , 
+                "count" : len(result_list)}, 200
+
+
+# 전체목록(주인장 + 유저) 불러오기
+class RecipeAllListResource(Resource):
+    @jwt_required()
+    def get(self) :
+      
+
+        order = request.args.get('order')
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+        
+
+        try :
+            connection = get_connection()
+
+            query = '''select r.title, r.percent , count(l.userId) as cnt
+                    from recipe r
+                    left join likeRecipe l
+                    on r.id = l.recipeId
+                    group by r.id
+                    order by ''' + order + '''  desc
+                    limit ''' + offset + ''', '''+ limit + ''';'''
+
+        
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query,)
+
+            result_list = cursor.fetchall()
+
+          
+
+            # i = 0
+            # for row in result_list :
+            #     result_list[i]['createdAt'] = row['createdAt'].isoformat()
+            #     result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
+            #     i = i + 1
+
+            cursor.close()
+            connection.close()
+    
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+
+        return {"result" : "success" ,
+                "items" : result_list , 
+                "count" : len(result_list)}, 200
+
+
+#내가 만든 레시피 목록 불러오기
+class RecipeMyListResource(Resource):
+    @jwt_required()
+    def get(self):
+        user_id = get_jwt_identity()
+        order = request.args.get('order')
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+        
+
+        try :
+            connection = get_connection()
+
+            query = '''select r.title, r.percent , r.createdAt 
+                    from recipe r
+                    left join likeRecipe l
+                    on r.id = l.recipeId
+                    where r.userId= %s
+                    group by r.id
+                    order by ''' + order + '''  desc
+                    limit ''' + offset + ''', '''+ limit + ''';'''
+
+            record = (user_id, )
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query, record)
+
+            result_list = cursor.fetchall()
+
+          
+
+            # i = 0
+            # for row in result_list :
+            #     result_list[i]['createdAt'] = row['createdAt'].isoformat()
+            #     result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
+            #     i = i + 1
+
+            cursor.close()
+            connection.close()
+    
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+
+        return {"result" : "success" ,
+                "items" : result_list , 
+                "count" : len(result_list)}, 200
+
+
+#레시피 세부 선택
+class RecipeResource(Resource):
+    @jwt_required()
+    def get(self,recipe_id) :
+    
+
+        try :
+            connection = get_connection()
+
+            query = '''select r.title, count(l.userId) as cnt , r.percent ,a.alcoholType, r.userId , r.engTitle,r.intro, r.content, GROUP_CONCAT(DISTINCT ig.name SEPARATOR ', ')as '재료'
+                    from recipe r
+                    left join likeRecipe l
+                    on r.id = l.recipeId
+                    left join recipeAlcohol ra
+                    on r.id = ra.recipeId
+                    left join alcohol a
+                    on ra.AlcoholId = a.id
+                    left join recipeIngredient ri
+                    on ri.recipeId = r.id
+                    left join ingredient ig
+                    on ig.id = ri.ingredientId
+                    where r.id = %s
+                    group by l.recipeId 
+                    order by count(l.userId) desc;'''
+
+            record = (recipe_id, )
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query, record)
+            
+            result_list = cursor.fetchall()
 
 
 
+            if result_list[0]['title'] is None:
+                return {'error': '잘못된 알콜 아이디 입니다.'}, 400        
 
+            # i = 0
+            # for row in result_list :
+            #     result_list[i]['createdAt'] = row['createdAt'].isoformat()
+            #     result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
+            #     i = i + 1
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            cursor.close()
+            connection.close()
+    
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+        return { "result" : "success" ,
+                "alcohol" : result_list[0] }, 200
+    
 
 
 
