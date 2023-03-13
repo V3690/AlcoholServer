@@ -4,8 +4,7 @@ from flask_jwt_extended import JWTManager
 from config import Config
 from resource.alcohol import AlcoholListResource, AlcoholRequestResource, AlcoholResource
 from resource.game import RekognitionEmotionResource, DiceResource
-from resource.recipe import RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource
-from resource.recipe2 import IngredientSearch, recipeIngredient
+from resource.recipe import IngredientSearch, RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource, recipeIngredient
 from resource.user import UserLoginResource, UserLogoutResource, UserRegisterResource, UserResource, jwt_blocklist, UserDetailResource
 
 
@@ -32,7 +31,7 @@ api.add_resource(UserDetailResource, '/user/detail')
 api.add_resource(AlcoholRequestResource, '/alcohol/request')
 api.add_resource(AlcoholListResource, '/alcohol')
 api.add_resource(AlcoholResource, '/alcohol/<int:alcohol_id>')
-
+api.add_resource(RekognitionEmotionResource, '/emotion')
 api.add_resource(RekognitionEmotionResource, '/game/emotion')
 api.add_resource(DiceResource, '/game/dice/<int:penaltyType_id>')
 
@@ -43,9 +42,21 @@ api.add_resource(RecipeHonorListResource, '/recipe/honor')
 api.add_resource(RecipeLikeListResource, '/recipe/favorite')
 api.add_resource(RecipeLikeSearchResource, '/recipe/favorite/search')
 
+
 # 부재료 검색 및 부재료 목록
 api.add_resource(IngredientSearch,'/ingredient/search')
 api.add_resource(recipeIngredient,'/ingredient')
+
+
+# 레시피 주인장전체목록,유저전체목록,주인장+유저전체목록, 내가만든전체목록,세부레시피조회
+api.add_resource(RecipeMasterallListResource,'recipe/Masterall')
+api.add_resource(RecipeUserListResource,'/recipe/user')
+api.add_resource(RecipeMyListResource,'/recipe/me')
+api.add_resource(RecipeAllListResource,'/recipe/all')
+api.add_resource(RecipeResource, '/recipe/user/<int:recipe_id>')
+
+
+
 
 
 if __name__ == '__main__': 
