@@ -9,7 +9,6 @@ from mysql_connection import get_connection
 from config import Config
 
 
-
 ## 레시피 작성 페이지 ##
 # 레시피 저장
 class CreatingRecipe(Resource):
@@ -30,24 +29,16 @@ class CreatingRecipe(Resource):
 
         # userId, title, engTitle, intro, percent, imgUrl, content
         
-        # 필수 항목 체크
-        if 'title' not in request.form or 'percent' not in request.form or 'content' not in request.form or 'img' not in request.form :
-            return {'error' : '<한글 이름, 도수, 레시피, 이미지>는 필수입니다.'}, 400
-
-        if 'engTitle' not in request.form :
-            engTitle = ""
-        else :
-            engTitle = request.form['engTitle']
-
-        if 'intro' not in request.form :
-            introe = ""
-        else :
-            intro = request.form['intro']
-
         title = request.form['title']
+        engTitle = request.form['engTitle']
+        intro = request.form['intro']
         percent = request.form['percent']
         content = request.form['content']
         file = request.files['img']
+
+        # 필수 항목 체크
+        if (title == "") or (percent == "") or (content == "") or (file == "") :
+            return {'error' : '<한글 이름, 도수, 레시피, 이미지>는 필수입니다.'}, 400
 
         print(file.content_type)
         
@@ -91,7 +82,7 @@ class CreatingRecipe(Resource):
         try :
             connection = get_connection()
 
-            query = '''insert into request(userId, title, engTitle, intro, percent, imgUrl, content)
+            query = '''insert into recipe(userId, title, engTitle, intro, percent, imgUrl, content)
                     values
                     (%s, %s, %s, %s, %s, %s, %s);'''
 
@@ -114,7 +105,7 @@ class CreatingRecipe(Resource):
             connection = get_connection()
 
             query = '''select id from recipe
-                    where title like '%';'''
+                    where title like %s;'''
 
             record = (title, )
             cursor = connection.cursor(dictionary= True)
@@ -147,8 +138,8 @@ class CreatingRecipeIngredient(Resource):
         #     "ingredientId": "1,2,3,4,5,6"
         # }
 
-        recipe = data['recipeId']
-        alcolhols = data['alcolholId'].split(',')
+        recipe = int(data['recipeId'])
+        alcolhols = data['alcoholId'].split(',')
         ingredients = data['ingredientId'].split(',')
 
         try :
@@ -156,16 +147,16 @@ class CreatingRecipeIngredient(Resource):
             cursor = connection.cursor()
 
         # recipe_alcohol 테이블에 저장
-            for alcolhol in alcolhols:
+            for alcohol in alcolhols:
                 cursor.execute(
-                    "INSERT INTO recipe_alcohol (recipeId, alcolholId) VALUES (%s, %s)",
-                    (recipe, alcolhol)
+                    "INSERT INTO recipeAlcohol (recipeId, alcoholId) VALUES (%s, %s)",
+                    (recipe, alcohol)
                 )
 
         # recipe_ingredient 테이블에 저장
             for ingredient in ingredients:
                 cursor.execute(
-                    "INSERT INTO recipe_ingredient (recipeId, ingredientId) VALUES (%s, %s)",
+                    "INSERT INTO recipeIngredient (recipeId, ingredientId) VALUES (%s, %s)",
                     (recipe, ingredient)
                 )
 
