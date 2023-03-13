@@ -3,6 +3,7 @@ from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from config import Config
 from resource.alcohol import AlcoholListResource, AlcoholRequestResource, AlcoholResource
+from resource.creating import CreatingRecipe, CreatingRecipeIngredient
 from resource.game import RekognitionEmotionResource, DiceResource
 from resource.recipe import IngredientSearch, RecipeAllListResource, RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource, RecipeMasterallListResource, RecipeMyListResource, RecipeResource, RecipeUserListResource, recipeIngredient
 from resource.user import UserLoginResource, UserLogoutResource, UserRegisterResource, UserResource, jwt_blocklist, UserDetailResource
@@ -54,7 +55,9 @@ api.add_resource(RecipeMyListResource,'/recipe/me')
 api.add_resource(RecipeAllListResource,'/recipe/all')
 api.add_resource(RecipeResource, '/recipe/user/<int:recipe_id>')
 
-
+# 레시피 작성
+api.add_resource(CreatingRecipe, '/creating/recipe')
+api.add_resource(CreatingRecipeIngredient, '/creating/ingredient')
 
 
 
