@@ -88,7 +88,7 @@ class RekognitionEmotionResource(Resource) :
             cursor.close()
             connection.close()
 
-            random_num = random.randint(0, 3)
+            random_num = random.randint(0, len(emotion_result)-1)
 
             return { "result" : emotion_result[random_num] }
 
@@ -106,13 +106,172 @@ class RekognitionEmotionResource(Resource) :
 
 
 # 주사위 게임 API
-# penaltyType_id : 1 , 벌칙
-# penaltyType_id : 2 , 벌주
-# penaltyType_id : 3 , 벌칙 + 벌주 중 랜덤으로 하나
+
+# subjectType_id === >  1 : 본인만, 2: 본인제외 , 3: 전체랜덤
+# penaltyType_id === >  1 : 벌칙,  2  : 벌주, 3: 전체랜덤
+
 class DiceResource(Resource):
     @jwt_required()
-    def get(self) :
-        return
+    def get(self, subjectType_id, penaltyType_id) :
+
+        try :
+            connection = get_connection()
+        
+            # 본인만
+            if subjectType_id ==1 :
+
+                query = '''select *
+                        from diceSubject
+                        where subject = "내가";'''
+                
+                cursor = connection.cursor(dictionary=True)
+
+
+                cursor.execute(query, )
+
+                subject_list = cursor.fetchall()
+                subject_list = subject_list[0]['subject']
+
+                if penaltyType_id == 1 or penaltyType_id == 2 :
+
+                    query = '''select * from dicePenalty
+                            where penaltyType = ''' + str(penaltyType_id) +''';'''
+                                        
+                    # record = (penaltyType, )
+                    cursor = connection.cursor(dictionary= True)
+                    cursor.execute(query, )
+
+                    action_list = cursor.fetchall()
+
+                    if action_list[0]['id'] is None :
+                        return{'error' : '잘못된 알콜 아이디 입니다.'}, 400
+                    
+                elif penaltyType_id == 3:
+                    connection = get_connection()
+                    query = '''select * from dicePenalty;'''
+                                        
+                    # record = (penaltyType_id, )
+                    cursor = connection.cursor(dictionary= True)
+                    cursor.execute(query, )
+
+                #     cursor = connection.cursor(dictionary=True)
+                #     cursor.execute(query, 
+
+                    action_list = cursor.fetchall()
+
+                action_list = action_list[random.randint( 1, len(action_list) -1 )]['action']
+                    
+
+            
+            # 본인 제외
+            if subjectType_id == 2 :
+
+                query = '''select *
+                        from diceSubject
+                        where subject not in ("내가");'''
+                cursor = connection.cursor(dictionary=True)
+
+                cursor.execute(query, )
+
+                subject_list = cursor.fetchall()
+
+                subject_list = subject_list[random.randint( 1, len(subject_list) -1 )]['subject']
+
+                if penaltyType_id == 1 or penaltyType_id == 2 :
+
+                    query = '''select * from dicePenalty
+                            where penaltyType = ''' + str(penaltyType_id) +''';'''
+                                        
+                    # record = (penaltyType, )
+                    cursor = connection.cursor(dictionary= True)
+                    cursor.execute(query, )
+
+                    action_list = cursor.fetchall()
+
+                    if action_list[0]['id'] is None :
+                        return{'error' : '잘못된 알콜 아이디 입니다.'}, 400
+                    
+                elif penaltyType_id == 3:
+                    connection = get_connection()
+                    query = '''select * from dicePenalty;'''
+                                        
+                    # record = (penaltyType_id, )
+                    cursor = connection.cursor(dictionary= True)
+                    cursor.execute(query, )
+
+                #     cursor = connection.cursor(dictionary=True)
+                #     cursor.execute(query, 
+
+                    action_list = cursor.fetchall()
+
+                action_list = action_list[random.randint( 1, len(action_list) -1 )]['action']
+                    
+
+            # 전체랜덤
+            if subjectType_id == 3:
+
+                query = '''select *
+                        from diceSubject;'''
+
+                # record = (user_id, )
+
+                cursor = connection.cursor(dictionary=True)
+
+                cursor.execute(query, )
+
+                subject_list = cursor.fetchall()
+
+                subject_list = subject_list[random.randint( 1, len(subject_list) -1 )]['subject']
+                if penaltyType_id == 1 or penaltyType_id == 2 :
+
+                    query = '''select * from dicePenalty
+                            where penaltyType = ''' + str(penaltyType_id) +''';'''
+                                        
+                    # record = (penaltyType, )
+                    cursor = connection.cursor(dictionary= True)
+                    cursor.execute(query, )
+
+                    action_list = cursor.fetchall()
+
+                    if action_list[0]['id'] is None :
+                        return{'error' : '잘못된 알콜 아이디 입니다.'}, 400
+                    
+                elif penaltyType_id == 3:
+                    connection = get_connection()
+                    query = '''select * from dicePenalty;'''
+                                        
+                    # record = (penaltyType_id, )
+                    cursor = connection.cursor(dictionary= True)
+                    cursor.execute(query, )
+
+                #     cursor = connection.cursor(dictionary=True)
+                #     cursor.execute(query, 
+
+                    action_list = cursor.fetchall()
+
+                action_list = action_list[random.randint( 1, len(action_list) -1 )]['action']
+                
+            
+            cursor.close()
+            connection.close()
+
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        return {"result" : "success",
+                "subject": subject_list,
+                "action" : action_list},200
+
+
+
+
+
+
+
+    
     
 
 # 건배사 API
