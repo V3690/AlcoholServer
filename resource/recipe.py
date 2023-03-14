@@ -455,7 +455,7 @@ class RecipeMyListResource(Resource):
         try :
             connection = get_connection()
 
-            query = '''select r.title, r.percent , r.createdAt 
+            query = '''select r.title, r.percent , r.createdAt ,r.updatedAt
                     from recipe r
                     left join likeRecipe l
                     on r.id = l.recipeId
@@ -472,11 +472,11 @@ class RecipeMyListResource(Resource):
 
           
 
-            # i = 0
-            # for row in result_list :
-            #     result_list[i]['createdAt'] = row['createdAt'].isoformat()
-            #     result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
-            #     i = i + 1
+            i = 0
+            for row in result_list :
+                result_list[i]['createdAt'] = row['createdAt'].isoformat()
+                result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
+                i = i + 1
 
             cursor.close()
             connection.close()
