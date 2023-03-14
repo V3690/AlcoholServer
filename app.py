@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from config import Config
-from resource.alcohol import AlcoholListResource, AlcoholRequestResource, AlcoholResource
+from resource.alcohol import AlcoholAddResource, AlcoholDeleteResource, AlcoholListResource, AlcoholRequestResource, AlcoholResource, AlcoholUpdateResource
 from resource.creating import CreatingAlcoholList, CreatingIngredientList, CreatingRecipe, CreatingRecipeIngredient, CreatingSearchAlcohol, CreatingSearchIngredient
 from resource.game import RekognitionEmotionResource, DiceResource
 from resource.recipe import RecipeAllListResource, RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource, RecipeMasterallListResource, RecipeMyListResource, RecipeResource, RecipeUserListResource
@@ -59,6 +59,11 @@ api.add_resource(CreatingIngredientList, '/creating/list/ingredient')
 # 레시피 재료 검색
 api.add_resource(CreatingSearchAlcohol, '/creating/search/alcohol')
 api.add_resource(CreatingSearchIngredient, '/creating/search/ingredient')
+
+# 관리자용 술도감 생성,삭제,수정
+api.add_resource(AlcoholAddResource, '/alcohol/add')
+api.add_resource(AlcoholDeleteResource, '/alcohol/delete/<int:alcohol_id>')
+api.add_resource(AlcoholUpdateResource, '/alcohol/update/<int:alcohol_id>')
 
 
 
