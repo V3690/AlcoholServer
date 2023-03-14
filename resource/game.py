@@ -88,7 +88,7 @@ class RekognitionEmotionResource(Resource) :
             cursor.close()
             connection.close()
 
-            random_num = random.randint(0, 3)
+            random_num = random.randint(0, len(emotion_result)-1)
 
             return { "result" : emotion_result[random_num] }
 
