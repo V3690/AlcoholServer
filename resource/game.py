@@ -10,6 +10,7 @@ from flask_jwt_extended import get_jwt_identity
 from mysql_connection import get_connection
 from config import Config
 import random
+import pandas as pd
 
 class RekognitionEmotionResource(Resource) :
     @jwt_required()
@@ -69,7 +70,7 @@ class RekognitionEmotionResource(Resource) :
 
         try :
             connection = get_connection()
-            query = '''select a.id as alcoholId, a.name, ea.emotionId, e.name as emotion, ea.content
+            query = '''select a.id as alcoholId, a.name, a.imgUrl, ea.emotionId, e.name as emotion, ea.content
                     from alcohol a
                     join emotionAlcohol ea
                     on a.id = ea.alcoholId
@@ -107,63 +108,96 @@ class RekognitionEmotionResource(Resource) :
 # 주사위 게임 API
 # penaltyType_id : 1 , 벌칙
 # penaltyType_id : 2 , 벌주
-# penaltyType_id : 1 , 벌칙 + 벌주 중 랜덤으로 하나
+# penaltyType_id : 3 , 벌칙 + 벌주 중 랜덤으로 하나
 class DiceResource(Resource):
     @jwt_required()
-    def get(self, penaltyType_id) :
+    def get(self) :
+        return
+    
+
+# 건배사 API
+class CheersResource(Resource):
+    @jwt_required()
+    def post(self) :
+        type = request.args.get('type')
+        data = request.get_json()
+
         try :
+            connection = get_connection()
 
-            if penaltyType_id == 1 or penaltyType_id == 2:
+            query = '''select *
+                    from cheersMent
+                    where type = '''+ type +''';'''
 
-
-                connection = get_connection()
-                query = '''select * from dicePenalty
-                        where penaltyType = %s;'''
-                                    
-                record = (penaltyType_id, )
-                cursor = connection.cursor(dictionary= True)
-                cursor.execute(query, record)
-
-                action_list = cursor.fetchall()
-
-                if action_list[0]['id'] is None :
-                    return{'error' : '잘못된 알콜 아이디 입니다.'}, 400
-                
-            elif penaltyType_id == 3:
-                connection = get_connection()
-                query = '''select * from dicePenalty;'''
-                                    
-                # record = (penaltyType_id, )
-                cursor = connection.cursor(dictionary= True)
-                cursor.execute(query, )
-
-            #     cursor = connection.cursor(dictionary=True)
-            #     cursor.execute(query, 
-
-                action_list = cursor.fetchall()
-
-
-            query = '''select * from diceSubject;'''
-            
-            cursor = connection.cursor(dictionary= True)
+            cursor = connection.cursor(dictionary=True)
             cursor.execute(query, )
 
-            subject_list = cursor.fetchall()
+
+            result_list = cursor.fetchall()
 
             cursor.close()
             connection.close()
 
+            chatbot_data = pd.DataFrame(result_list)
+            # print(chatbot_data)
+
+            # 이게 잘 된 버전
+            chatbot_data = chatbot_data.fillna(" ")
+            # rule의 데이터를 split 하여 list형태로 변환 후, index값과 함께 dictionary 형태로 저장 
+            chat_dic = {} 
+            row = 0 
+            for rule in chatbot_data['rule']: 
+                chat_dic[row] = rule.split('|')
+                row += 1 
+
+            chat = data['ment']
+
+            # result_df = pd.DataFrame(columns=[['title', 'first', 'last']])
+            cheers_list = []
+
+
+            for k, v in chat_dic.items():
+                chat_flag = False
+                for word in v:
+                    if word in chat:
+                        chat_flag = True
+                        
+                    else:
+                        chat_flag = False
+                    break
+                
+                if chat_flag:
+
+                    cheers_list.append(chatbot_data[chatbot_data.index == k])
+
+
+            random_num = random.randint(0, len(cheers_list)-1)
+
+            cheers_list[random_num].to_dict()
+
+
+            key = list(cheers_list[random_num].to_dict()['title'].keys())[0]
+
+            cheers_dict = {"title" :cheers_list[random_num].to_dict()['title'].get(key) , 
+               "first" :cheers_list[random_num].to_dict()['first'].get(key),
+               "last" :cheers_list[random_num].to_dict()['last'].get(key)}
+      
+            print(cheers_dict)
+
+            return {"result" : "success" ,
+                "item" : cheers_dict}, 200
+        
+
+            
         except Error as e :
-            print(e)            
+            print(e)
             cursor.close()
             connection.close()
-            return {"error" : str(e)}, 500
+            return {'error' : str(e)}, 500
         
-        # print(subject_list[random.randint( 1, len(subject_list) -1 )]['subject'])
-        
-        # print("subject_list : " + str(len(subject_list)))
-        # print("action_list : " + str(len(action_list)))
-        
-        return { "result" : "success" ,
-                "subject": subject_list[random.randint( 1, len(subject_list) -1 )]['subject'],
-                "alcohol" : action_list[random.randint( 1, len(action_list) -1 )]['action']}, 200
+        except ValueError as e :
+            print(e)
+            cursor.close()
+            connection.close()
+            return {'error' : "다른 단어 또는 문장을 입력해주세요"}, 500
+                
