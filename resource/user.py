@@ -319,7 +319,103 @@ class UserDetailResource(Resource) :
             connection.close()
 
         
-      
+#비밀번호 변경
+class UserPasswordResetResource(Resource) :
+    def put(self,user_id):
+        data = request.get_json()
+
+        if len(data['password']) < 4 or len(data['password']) > 12: 
+            return {'error': '비밀번호는 4자리 이상, 12자리 이하로 입력해주세요.'}, 400 
+        
+        hashed_password = hash_password( data['password'] ) 
+
+        try :
+            # DB에 연결
+            connection = get_connection()
+
+            # 쿼리문 만들기
+            query = '''update users
+                    set password = %s
+                    where email = %s;'''
+
+            record = (hashed_password, user_id )
+
+            # 커서를 가져온다.
+            cursor = connection.cursor()
+
+            # 쿼리문을 커서를 이용해서 실행한다
+            cursor.execute(query, record)
+
+            # 커넥션을 커밋해줘야한다
+            connection.commit()
+
+            # 자원 해제
+            cursor.close()
+            connection.close()
+
+        except Error as e:
+            print(e)
+            cursor.close() 
+            connection.close()
+            return {'error': str(e) }, 500 # 500은 서버에러를 리턴하는 에러코드
+       
+        # user_id를 바로 클라이언트에게 보내면 안되고,
+        # jwt로 암호화 해서, 인증토큰을 보낸다.
+
+
+        return {'result' : 'success'}, 200 # 200은 성공했다는 의미의 코드
+
+
+class UserNicknameResetResource(Resource):
+    @jwt_required()
+    def put(self) :
+        user_id = get_jwt_identity()
+        data = request.get_json() 
+        if "nickname" in data:
+            # 닉네임이 이미 존재하는지 확인한다.
+            try:
+                connection = get_connection()
+                query = """
+                    SELECT nickname FROM users WHERE nickname = %s;
+                    """
+                cursor = connection.cursor()
+                cursor.execute(query, (data['nickname'], ))
+                record = cursor.fetchone()
+                cursor.close()
+                connection.close()
+                print(record)
+                if record:
+                    return {'error': '이미 존재하는 닉네임입니다.'}, 400
+            except Error as e:
+                print(e)
+                cursor.close()
+                connection.close()
+                return {'error': str(e) }, 500 # 500은 서버에러를 리턴하는 에러코드
+            
+            try :
+                connection = get_connection()
+
+                query = f'''update users 
+                    set nickname = %s
+                        where id = {user_id};'''
+
+                record = (data['nickname'],)
+                cursor = connection.cursor(dictionary= True)
+                cursor.execute(query, record)
+
+                connection.commit()
+
+                cursor.close()
+                connection.close()
+
+            except Error as e :
+                print(e)
+                cursor.close()
+                connection.close()
+                return {'error' : str(e)}, 500
+
+            return {'result' : 'success',}, 200
+
 
           
       
