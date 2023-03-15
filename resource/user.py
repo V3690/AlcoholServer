@@ -160,12 +160,8 @@ class UserLoginResource(Resource):
 
         # 4. id를 jwt 토큰을 만들어서 클라이언트에게 보낸다.
         acces_token = create_access_token(identity=result_list[0]['id'] ) # identity는 토큰에 담길 내용이다. # 담을게 여러개면 딕셔너리 형태로담는다.
-        
-        print(result_list[0]['nickname'])
-        print(result_list[0]['percent'])
 
-
-        return {'nickname' : result_list[0]['nickname'], 'percent' : result_list[0]['percent'],'access_token': acces_token}, 200 # 200은 성공했다는 의미의 코드
+        return {'nickname' : result_list[0]['nickname'],'access_token': acces_token}, 200 # 200은 성공했다는 의미의 코드
 
 ## 로그아웃된 토큰을 저장할 set 만든다.
 jwt_blocklist = set() # set은 중복을 허용하지 않는다.
@@ -269,7 +265,7 @@ class UserNicknameResetResource(Resource):
                 record = cursor.fetchone()
                 cursor.close()
                 connection.close()
-                print(record)
+                
                 if record:
                     return {'error': '이미 존재하는 닉네임입니다.'}, 400
             except Error as e:
@@ -304,7 +300,9 @@ class UserNicknameResetResource(Resource):
 
 # 비밀번호 변경
 class UserPasswordResetResource(Resource) :
-    def put(self,user_id):
+    @jwt_required()
+    def put(self):
+        user_id = get_jwt_identity()
         data = request.get_json()
 
         if len(data['password']) < 4 or len(data['password']) > 12: 
@@ -319,7 +317,7 @@ class UserPasswordResetResource(Resource) :
             # 쿼리문 만들기
             query = '''update users
                     set password = %s
-                    where email = %s;'''
+                    where id = %s;'''
 
             record = (hashed_password, user_id )
 
@@ -341,10 +339,6 @@ class UserPasswordResetResource(Resource) :
             cursor.close() 
             connection.close()
             return {'error': str(e) }, 500 # 500은 서버에러를 리턴하는 에러코드
-       
-        # user_id를 바로 클라이언트에게 보내면 안되고,
-        # jwt로 암호화 해서, 인증토큰을 보낸다.
-
 
         return {'result' : 'success'}, 200 # 200은 성공했다는 의미의 코드
 

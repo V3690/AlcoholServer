@@ -158,14 +158,14 @@ class AlcoholRequestResource(Resource):
             
             client.upload_fileobj(file,
                                     Config.BUCKET_NAME,
-                                    new_file_name,
+                                    'alcohol/' + file.filename,
                                     ExtraArgs = {'ACL':'public-read', 'ContentType' : file.content_type } )
 
         except Exception as e:
             return {'error' : str(e)}, 500
 
         # 3. 저장된 사진의 imgUrl 을 만든다.        
-        imgUrl = Config.S3_LOCATION + new_file_name
+        imgUrl = Config.S3_LOCATION +'alcohol/'+ file.filename
 
         # 4. DB에 저장한다.
         try :
@@ -235,14 +235,14 @@ class AlcoholAddResource(Resource):
             
             client.upload_fileobj(file,
                                     Config.BUCKET_NAME,
-                                    file.filename,
+                                    'alcohol/' +file.filename,
                                     ExtraArgs = {'ACL':'public-read', 'ContentType' : file.content_type } )
             
         except Exception as e:
             return {'error' : str(e)}, 500
         
         # 3. 저장된 사진의 imgUrl 을 만든다.        
-        imgUrl = Config.S3_LOCATION + file.filename
+        imgUrl = Config.S3_LOCATION +'alcohol/' + file.filename
         
         # 추가할 술도감의 정보를 DB에 추가한다.
         try :

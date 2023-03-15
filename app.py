@@ -44,7 +44,7 @@ api.add_resource(RecipeLikeSearchResource, '/recipe/favorite/search')
 
 # 닉네임변경, 비밀번호변경, 탈퇴
 api.add_resource(UserNicknameResetResource,'/user/edit/nickname')
-api.add_resource(UserPasswordResetResource,'/user/edit/password/<int:user_id>')
+api.add_resource(UserPasswordResetResource,'/user/edit/password')
 api.add_resource(UserDetailResource, '/user/detail') 
 
 
