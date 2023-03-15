@@ -315,6 +315,7 @@ class CreatingSearchIngredient(Resource):
 
 
 # 본인 레시피 수정, 삭제
+# 내가쓴 레시피 수정 및 삭제
 class CreatingRecipeEdit(Resource):
     @jwt_required()
     def put(self, recipe_id) :
@@ -322,16 +323,16 @@ class CreatingRecipeEdit(Resource):
         # photo(file), content(text)
         
         # 유저 토큰으로부터 user_id 반환
-        user_id = get_jwt_identity()
+        
 
-        if 'image' not in request.files:
+        if 'img' not in request.files:
             # 쿼리 부분을 만든다.
             title = request.form['title']
             engTitle = request.form['engTitle']
             intro = request.form['intro']
             percent = request.form['percent']
             content = request.form['content']
-
+            user_id = get_jwt_identity()
             # S3에 파일 업로드가 필요 없으므로, 디비에 저장한다.
             try :
                 # DB에 연결
@@ -343,7 +344,6 @@ class CreatingRecipeEdit(Resource):
                         engTitle = %s,
                         intro = %s,
                         percent = %s,
-                        imgUrl = null,
                         content = %s
                         where userId = {user_id} and id = {recipe_id};'''
 
@@ -372,9 +372,9 @@ class CreatingRecipeEdit(Resource):
                 connection = get_connection()
 
                 query = '''select id from recipe
-                        where title like %s;'''
+                        where id= %s;'''
 
-                record = (title, )
+                record = (recipe_id, )
                 cursor = connection.cursor(dictionary= True)
                 cursor.execute(query, record)
 
@@ -400,39 +400,43 @@ class CreatingRecipeEdit(Resource):
             percent = request.form['percent']
             content = request.form['content']
             file = request.files['img']
+            user_id = get_jwt_identity()
             # 파일이 있으니까, 파일명을 새로 만들어서
             # S3 에 업로드한다.
-
+            if 'image' not in file.content_type :
+                return {'error' : 'image 파일만 업로드 가능합니다.'}, 400
             # 2. S3 에 파일 업로드
             # 파일명을 우리가 변경해 준다.
             # 파일명은, 유니크하게 만들어야 한다.
             current_time = datetime.now()
-            new_file_name = current_time.isoformat().replace(':', '_') + '.jpg'
-
-            # 유저가 올린 파일의 이름을, 내가 만든 파일명으로 변경
+            new_file_name = current_time.isoformat().replace(':', '_') + '.' + file.content_type.split('/')[-1]
+            
+            # 파일명을, 유니크한 이름으로 변경한다.
+            # 클라이언트에서 보낸 파일명을 대체!
+            
             file.filename = new_file_name
 
-            # S3 에 업로드 하면 된다.
-            # AWS 의 라이브러리를 사용해야 한다.
-            # 이 파이썬 라이브러리가 boto3 라이브러리다!
-            # boto3 라이브러리 설치
-            # pip install boto3 
+            # S3 에 파일을 업로드 하면 된다.
+            # S3 에 파일 업로드 하는 라이브러리가 필요
+            # 따라서, boto3 라이브러리를 이용해서
+            # 업로드 한다.
 
-            s3 = boto3.client('s3', 
-                        aws_access_key_id = Config.ACCESS_KEY,
-                        aws_secret_access_key = Config.SECRET_ACCESS)
-
+            client = boto3.client('s3', 
+                        aws_access_key_id = Config.ACCESS_KEY ,
+                        aws_secret_access_key = Config.SECRET_ACCESS )
+            
             try :
-                s3.upload_fileobj(file,
-                                    Config.BUCKET_NAME,
-                                    'recipe/' + file.filename,
-                                    ExtraArgs = {'ACL':'public-read', 'ContentType':file.content_type} )                 
+                
+                client.upload_fileobj(file,
+                                        Config.BUCKET_NAME,
+                                    'recipe/'+ file.filename,
+                                        ExtraArgs = {'ACL':'public-read', 'ContentType' : file.content_type } )
 
-            except Exception as e :
+            except Exception as e:
                 return {'error' : str(e)}, 500
 
-            # 데이터 베이스에 업데이트 해준다.
-            imgUrl = Config.S3_LOCATION + 'recipe/' + file.filename
+            # 3. 저장된 사진의 imgUrl 을 만든다.        
+            imgUrl = Config.S3_LOCATION + 'recipe/'+ file.filename
             try :
                 # DB에 연결
                 connection = get_connection()
@@ -473,9 +477,9 @@ class CreatingRecipeEdit(Resource):
                 connection = get_connection()
 
                 query = '''select id from recipe
-                        where title like %s;'''
+                        where id= %s;'''
 
-                record = (title, )
+                record = (recipe_id, )
                 cursor = connection.cursor(dictionary= True)
                 cursor.execute(query, record)
 
@@ -521,18 +525,19 @@ class CreatingRecipeEdit(Resource):
 
         return {'result' : 'success'}, 200
 
+
 # 본인 레시피 재료 수정
+#내가 쓴 레시피 수정중 부재료 수정
 class CreatingRecipeIngredientEdit(Resource):
+    @jwt_required()
     def put(self, recipe_id):
         data = request.get_json()
 
         # {
-        #     "recipeId": 3,
         #     "alcolholId": "1,2,3,4,5,6"
         #     "ingredientId": "1,2,3,4,5,6"
         # }
 
-        recipe = int(data['recipeId'])
         alcohols = data['alcoholId'].split(',')
         ingredients = data['ingredientId'].split(',')
 
@@ -555,13 +560,13 @@ class CreatingRecipeIngredientEdit(Resource):
             for alcohol in alcohols:
                 cursor.execute(
                 '''insert into recipeAlcohol (recipeId, alcoholId) values (%s, %s)''',
-                    (recipe, alcohol)
+                    (recipe_id, alcohol)
                 )
 
             for ingredient in ingredients:
                 cursor.execute(
                 '''insert into recipeIngredient (recipeId, ingredientId) values (%s, %s)''',
-                    (recipe, ingredient)
+                    (recipe_id, ingredient)
                 )
 
             connection.commit()
@@ -574,6 +579,7 @@ class CreatingRecipeIngredientEdit(Resource):
         finally:
             cursor.close()
             connection.close()
+
 
 # 전체 레시피 수정, 삭제 (관리자 전용)
 class CreatingRecipeEditMaster(Resource):
