@@ -11,8 +11,8 @@ class Config:
     PROPAGATE_EXCEPTIONS = True # JWT 관련 에러를 발생시키는지 여부
 
     # AWS 관련 변수 셋팅
-    ACCESS_KEY = 'AKIAXCSREUFFTO6BQ4U3'
-    SECRET_ACCESS = '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'
+    ACCESS_KEY = 'AKIAXCSREUFFZD5MQ3NG'
+    SECRET_ACCESS = '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'
 
     # S3 관련 변수 셋팅
     BUCKET_NAME= 'alcohol-app-jieun'
