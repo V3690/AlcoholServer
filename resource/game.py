@@ -12,6 +12,98 @@ from config import Config
 import random
 import pandas as pd
 
+
+## 오락실 페이지 ##
+
+
+# 건배사 (룰베이스챗봇)
+class CheersResource(Resource):
+    @jwt_required()
+    def post(self) :
+        type = request.args.get('type')
+        data = request.get_json()
+
+        try :
+            connection = get_connection()
+
+            query = '''select *
+                    from cheersMent
+                    where type = '''+ type +''';'''
+
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(query, )
+
+
+            result_list = cursor.fetchall()
+
+            cursor.close()
+            connection.close()
+
+            chatbot_data = pd.DataFrame(result_list)
+            # print(chatbot_data)
+
+            # 이게 잘 된 버전
+            chatbot_data = chatbot_data.fillna(" ")
+            # rule의 데이터를 split 하여 list형태로 변환 후, index값과 함께 dictionary 형태로 저장 
+            chat_dic = {} 
+            row = 0 
+            for rule in chatbot_data['rule']: 
+                chat_dic[row] = rule.split('|')
+                row += 1 
+
+            chat = data['ment']
+
+            # result_df = pd.DataFrame(columns=[['title', 'first', 'last']])
+            cheers_list = []
+
+
+            for k, v in chat_dic.items():
+                chat_flag = False
+                for word in v:
+                    if word in chat:
+                        chat_flag = True
+                        
+                    else:
+                        chat_flag = False
+                    break
+                
+                if chat_flag:
+
+                    cheers_list.append(chatbot_data[chatbot_data.index == k])
+
+
+            random_num = random.randint(0, len(cheers_list)-1)
+
+            cheers_list[random_num].to_dict()
+
+
+            key = list(cheers_list[random_num].to_dict()['title'].keys())[0]
+
+            cheers_dict = {"title" :cheers_list[random_num].to_dict()['title'].get(key) , 
+               "first" :cheers_list[random_num].to_dict()['first'].get(key),
+               "last" :cheers_list[random_num].to_dict()['last'].get(key)}
+      
+            print(cheers_dict)
+
+            return {"result" : "success" ,
+                "item" : cheers_dict}, 200
+        
+
+            
+        except Error as e :
+            print(e)
+            cursor.close()
+            connection.close()
+            return {'error' : str(e)}, 500
+        
+        except ValueError as e :
+            print(e)
+            cursor.close()
+            connection.close()
+            return {'error' : "다른 단어 또는 문장을 입력해주세요"}, 500
+                
+
+# 지금 내 얼굴은 (레코그니션얼굴인식)
 class RekognitionEmotionResource(Resource) :
     @jwt_required()
     def post(self) :
@@ -105,11 +197,9 @@ class RekognitionEmotionResource(Resource) :
         #         "alcohol" : emotion_result[random_num] }, 200
 
 
-# 주사위 게임 API
-
+# 명령 상자 (랜덤) - 주사위게임
 # subjectType_id === >  1 : 본인만, 2: 본인제외 , 3: 전체랜덤
 # penaltyType_id === >  1 : 벌칙,  2  : 벌주, 3: 전체랜덤
-
 class DiceResource(Resource):
     @jwt_required()
     def get(self, subjectType_id, penaltyType_id) :
@@ -271,92 +361,5 @@ class DiceResource(Resource):
 
 
 
-    
-    
-
-# 건배사 API
-class CheersResource(Resource):
-    @jwt_required()
-    def post(self) :
-        type = request.args.get('type')
-        data = request.get_json()
-
-        try :
-            connection = get_connection()
-
-            query = '''select *
-                    from cheersMent
-                    where type = '''+ type +''';'''
-
-            cursor = connection.cursor(dictionary=True)
-            cursor.execute(query, )
 
 
-            result_list = cursor.fetchall()
-
-            cursor.close()
-            connection.close()
-
-            chatbot_data = pd.DataFrame(result_list)
-            # print(chatbot_data)
-
-            # 이게 잘 된 버전
-            chatbot_data = chatbot_data.fillna(" ")
-            # rule의 데이터를 split 하여 list형태로 변환 후, index값과 함께 dictionary 형태로 저장 
-            chat_dic = {} 
-            row = 0 
-            for rule in chatbot_data['rule']: 
-                chat_dic[row] = rule.split('|')
-                row += 1 
-
-            chat = data['ment']
-
-            # result_df = pd.DataFrame(columns=[['title', 'first', 'last']])
-            cheers_list = []
-
-
-            for k, v in chat_dic.items():
-                chat_flag = False
-                for word in v:
-                    if word in chat:
-                        chat_flag = True
-                        
-                    else:
-                        chat_flag = False
-                    break
-                
-                if chat_flag:
-
-                    cheers_list.append(chatbot_data[chatbot_data.index == k])
-
-
-            random_num = random.randint(0, len(cheers_list)-1)
-
-            cheers_list[random_num].to_dict()
-
-
-            key = list(cheers_list[random_num].to_dict()['title'].keys())[0]
-
-            cheers_dict = {"title" :cheers_list[random_num].to_dict()['title'].get(key) , 
-               "first" :cheers_list[random_num].to_dict()['first'].get(key),
-               "last" :cheers_list[random_num].to_dict()['last'].get(key)}
-      
-            print(cheers_dict)
-
-            return {"result" : "success" ,
-                "item" : cheers_dict}, 200
-        
-
-            
-        except Error as e :
-            print(e)
-            cursor.close()
-            connection.close()
-            return {'error' : str(e)}, 500
-        
-        except ValueError as e :
-            print(e)
-            cursor.close()
-            connection.close()
-            return {'error' : "다른 단어 또는 문장을 입력해주세요"}, 500
-                

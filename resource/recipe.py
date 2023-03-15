@@ -4,6 +4,10 @@ from mysql_connection import get_connection
 from mysql.connector import Error
 from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 
+
+## 메인 페이지 ##
+
+
 class RecipeMasterListResource(Resource):
 
     # 유저가 오늘의 실험 페이지를 눌렀을 때, 레시피를 불러오는 api
@@ -29,7 +33,6 @@ class RecipeMasterListResource(Resource):
         finally:
             cursor.close()
             conn.close()
-
 
 # 명예 레시피 리스트를 불러오는 api
 # 최근 2주안의 좋아요를 가장 많이받은 레시피를 불러온다.
@@ -64,7 +67,11 @@ class RecipeHonorListResource(Resource):
             conn.close()
 
 
-# 내가 좋아요한 레시피 리스트를 불러오는 api
+
+## 즐겨찾기 페이지 ##
+
+
+# 즐겨찾기 레시피 리스트 (필터링)
 class RecipeLikeListResource(Resource):
     # 리스트는 정렬 기준이 여러개있다 
     # 1.(최신순, 인기순)
@@ -250,8 +257,7 @@ class RecipeLikeListResource(Resource):
             conn.close()
             cursor.close()
 
-
-# 즐겨찾는 레시피 중에서 사용자가 입력한 키워드를 포함하는 레시피를 검색
+# 즐겨찾기 레시피 리스트 내에서 검색 (사용자가 입력한 키워드를 포함하는)
 class RecipeLikeSearchResource(Resource):
     @jwt_required()
     def get(self):
@@ -286,7 +292,11 @@ class RecipeLikeSearchResource(Resource):
             cursor.close()
 
 
-#주인장레시피 목록 불러오기
+
+## 레시피 메뉴 ##
+
+
+# 레시피 목록 (공식)
 class RecipeMasterallListResource(Resource):
     @jwt_required()
     def get(self) :
@@ -336,8 +346,7 @@ class RecipeMasterallListResource(Resource):
                 "items" : result_list , 
                 "count" : len(result_list)}, 200
 
-
-# 유저레시피 목록 불러오기
+# 레시피 목록 (창작)
 class RecipeUserListResource(Resource):
     @jwt_required()
     def get(self) :
@@ -389,8 +398,7 @@ class RecipeUserListResource(Resource):
                 "items" : result_list , 
                 "count" : len(result_list)}, 200
 
-
-# 전체목록(주인장 + 유저) 불러오기
+# 레시피 목록 (공식+창작)
 class RecipeAllListResource(Resource):
     @jwt_required()
     def get(self) :
@@ -441,8 +449,7 @@ class RecipeAllListResource(Resource):
                 "items" : result_list , 
                 "count" : len(result_list)}, 200
 
-
-#내가 만든 레시피 목록 불러오기
+# 레시피 목록 (본인)
 class RecipeMyListResource(Resource):
     @jwt_required()
     def get(self):
@@ -493,8 +500,7 @@ class RecipeMyListResource(Resource):
                 "items" : result_list , 
                 "count" : len(result_list)}, 200
 
-
-#레시피 세부 선택
+# 레시피 1개 세부 정보
 class RecipeResource(Resource):
     @jwt_required()
     def get(self,recipe_id) :
@@ -548,17 +554,6 @@ class RecipeResource(Resource):
         # print(result_list)
         return { "result" : "success" ,
                 "alcohol" : result_list[0] }, 200
-    
-
-
-
-
-
-
-
-
-
-
 
 
 

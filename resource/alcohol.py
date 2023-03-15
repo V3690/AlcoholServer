@@ -8,7 +8,100 @@ import boto3
 from mysql_connection import get_connection
 from config import Config
 
-# 주인장에게 술 데이터 요청하는 api
+
+## 술도감 페이지 ##
+
+
+# 술 도감 (전체 목록)
+class AlcoholListResource(Resource):
+    @jwt_required()
+    def get(self) :
+        # user_id = get_jwt_identity()
+
+        order = request.args.get('order')
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+
+        try :
+            connection = get_connection()
+
+            query = '''select a.id, a.name, a.percent, a.alcoholType, a.category, a.produce, a.supply, a.imgUrl, count(l.alcoholId) as cnt
+                    from alcohol a
+                    left join likeAlcohol l
+                    on a.id = l.alcoholId
+                    group by a.id
+                    order by ''' + order + '''  desc, name asc
+                    limit ''' + offset + ''', '''+ limit + ''';'''
+
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(query, )
+
+
+            result_list = cursor.fetchall()
+
+            # i = 0
+            # for row in result_list :
+            #     result_list[i]['avg'] = float(row['avg'])
+            #     i = i + 1
+
+            cursor.close()
+            connection.close()
+
+
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+
+        return {"result" : "success" ,
+                "items" : result_list , 
+                "count" : len(result_list)}, 200
+
+# 술 도감 (1개 세부 정보)
+class AlcoholResource(Resource):
+    @jwt_required()
+    def get(self, alcohol_id) :
+        try :
+
+            connection = get_connection()
+            query = '''select id, name, percent, alcoholType, category, produce, supply, imgUrl
+                    from alcohol
+                    where id = %s;'''
+                                
+            record = (alcohol_id, )
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query, record)
+
+            result_list = cursor.fetchall()
+
+            if result_list[0]['id'] is None :
+                return{'error' : '잘못된 알콜 아이디 입니다.'}, 400
+
+            # i = 0
+            # for row in result_list :
+            #     result_list[i]['createdAt'] = row['createdAt'].isoformat()
+            #     result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
+            #     i = i + 1
+
+            cursor.close()
+            connection.close()
+
+
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        
+        return { "result" : "success" ,
+                "alcohol" : result_list[0] }, 200
+    
+
+# 유저의 요청(데이터 수정/추가)
 class AlcoholRequestResource(Resource):
     @jwt_required()
     def post(self) :
@@ -98,94 +191,83 @@ class AlcoholRequestResource(Resource):
 
         return {'result' : 'success'}, 200
     
-class AlcoholListResource(Resource):
+
+
+# 관리자용 술도감 추가 api [관리자용 페이지에서 추가버튼을 눌렀을시 실행되는 api]
+class AlcoholAddResource(Resource):
+
     @jwt_required()
-    def get(self) :
-        # user_id = get_jwt_identity()
-
-        order = request.args.get('order')
-        offset = request.args.get('offset')
-        limit = request.args.get('limit')
-
-        try :
-            connection = get_connection()
-
-            query = '''select a.id, a.name, a.percent, a.alcoholType, a.category, a.produce, a.supply, a.imgUrl, count(l.alcoholId) as cnt
-                    from alcohol a
-                    left join likeAlcohol l
-                    on a.id = l.alcoholId
-                    group by a.id
-                    order by ''' + order + '''  desc, name asc
-                    limit ''' + offset + ''', '''+ limit + ''';'''
-
-            cursor = connection.cursor(dictionary=True)
-            cursor.execute(query, )
-
-
-            result_list = cursor.fetchall()
-
-            # i = 0
-            # for row in result_list :
-            #     result_list[i]['avg'] = float(row['avg'])
-            #     i = i + 1
-
-            cursor.close()
-            connection.close()
-
-
-        except Error as e :
-            print(e)            
-            cursor.close()
-            connection.close()
-            return {"error" : str(e)}, 500
-                
-        # print(result_list)
-
-        return {"result" : "success" ,
-                "items" : result_list , 
-                "count" : len(result_list)}, 200
-
-
-class AlcoholResource(Resource):
-    @jwt_required()
-    def get(self, alcohol_id) :
-        try :
-
-            connection = get_connection()
-            query = '''select id, name, percent, alcoholType, category, produce, supply, imgUrl
-                    from alcohol
-                    where id = %s;'''
-                                
-            record = (alcohol_id, )
-            cursor = connection.cursor(dictionary= True)
-            cursor.execute(query, record)
-
-            result_list = cursor.fetchall()
-
-            if result_list[0]['id'] is None :
-                return{'error' : '잘못된 알콜 아이디 입니다.'}, 400
-
-            # i = 0
-            # for row in result_list :
-            #     result_list[i]['createdAt'] = row['createdAt'].isoformat()
-            #     result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
-            #     i = i + 1
-
-            cursor.close()
-            connection.close()
-
-
-        except Error as e :
-            print(e)            
-            cursor.close()
-            connection.close()
-            return {"error" : str(e)}, 500
-                
+    def post(self) :
+        # 관리자만 추가 가능
+        user_id = get_jwt_identity()
+        if user_id != 1 :
+            return {'error' : '관리자만 추가 가능합니다.'}, 400
         
-        return { "result" : "success" ,
-                "alcohol" : result_list[0] }, 200
+        # 사진과 내용은 필수 항목 !
+        if 'name' not in request.form or 'photo' not in request.files :
+            return {'error' : '데이터를 정확히 보내세요.'}, 400
+        # 폼데이터로 받는다
+        name = request.form['name']
+        percent = request.form['percent']
+        alcoholType = request.form['alcoholType']
+        category = request.form['category']
+        produce = request.form['produce']
+        supply = request.form['supply']
+        file = request.files['photo']
+        
+        if 'image' not in file.content_type :
+            return {'error' : 'image 파일만 업로드 가능합니다.'}, 400
+        
+        # 2. 사진을 먼저 S3에 저장한다.
+        # 파일명을 유니크하게 만드는 방법
+        current_time = datetime.now()
+        new_file_name = current_time.isoformat().replace(':', '_') + '.' + file.content_type.split('/')[-1]
+
+        # 파일명을, 유니크한 이름으로 변경한다.
+        # 클라이언트에서 보낸 파일명을 대체!
+        file.filename = new_file_name
+
+        client = boto3.client('s3', 
+                    aws_access_key_id = Config.ACCESS_KEY ,
+                    aws_secret_access_key = Config.SECRET_ACCESS )
+        
+        try:
+            
+            client.upload_fileobj(file,
+                                    Config.BUCKET_NAME,
+                                    file.filename,
+                                    ExtraArgs = {'ACL':'public-read', 'ContentType' : file.content_type } )
+            
+        except Exception as e:
+            return {'error' : str(e)}, 500
+        
+        # 3. 저장된 사진의 imgUrl 을 만든다.        
+        imgUrl = Config.S3_LOCATION + file.filename
+        
+        # 추가할 술도감의 정보를 DB에 추가한다.
+        try :
+            connection = get_connection()
+
+            query = '''insert into alcohol (name, percent, alcoholType, category, produce, supply, imgUrl)
+                    values (%s, %s, %s, %s, %s, %s, %s);'''
+
+            record = (name, percent, alcoholType, category, produce, supply, imgUrl)
+            cursor = connection.cursor()
+            cursor.execute(query, record)
+            connection.commit()
+
+            cursor.close()
+            connection.close()
+
+        except Error as e :
+            print(e)
+            cursor.close()
+            connection.close()
+            return {'error' : str(e)}, 500
+        
+        return {'result' : 'success'}, 200
     
-# 관리자용 술도감 수정 api [관리자용 페이지에서 수정완료후 버튼을 눌렀을시 실행되는 api]
+# 관리자용 술도감 수정 api [관리자용 페이지에서 수정완료 버튼을 눌렀을시 실행되는 api]
 class AlcoholUpdateResource(Resource):
     @jwt_required()
     def put(self, alcohol_id) :
@@ -311,76 +393,11 @@ class AlcoholDeleteResource(Resource):
         
         return {'result' : 'success'}, 200
     
-# 관리자용 술도감 추가 api [관리자용 페이지에서 추가버튼을 눌렀을시 실행되는 api]
-class AlcoholAddResource(Resource):
 
-    @jwt_required()
-    def post(self) :
-        # 관리자만 추가 가능
-        user_id = get_jwt_identity()
-        if user_id != 1 :
-            return {'error' : '관리자만 추가 가능합니다.'}, 400
-        
-        # 사진과 내용은 필수 항목 !
-        if 'name' not in request.form or 'photo' not in request.files :
-            return {'error' : '데이터를 정확히 보내세요.'}, 400
-        # 폼데이터로 받는다
-        name = request.form['name']
-        percent = request.form['percent']
-        alcoholType = request.form['alcoholType']
-        category = request.form['category']
-        produce = request.form['produce']
-        supply = request.form['supply']
-        file = request.files['photo']
-        
-        if 'image' not in file.content_type :
-            return {'error' : 'image 파일만 업로드 가능합니다.'}, 400
-        
-        # 2. 사진을 먼저 S3에 저장한다.
-        # 파일명을 유니크하게 만드는 방법
-        current_time = datetime.now()
-        new_file_name = current_time.isoformat().replace(':', '_') + '.' + file.content_type.split('/')[-1]
 
-        # 파일명을, 유니크한 이름으로 변경한다.
-        # 클라이언트에서 보낸 파일명을 대체!
-        file.filename = new_file_name
 
-        client = boto3.client('s3', 
-                    aws_access_key_id = Config.ACCESS_KEY ,
-                    aws_secret_access_key = Config.SECRET_ACCESS )
-        
-        try:
-            
-            client.upload_fileobj(file,
-                                    Config.BUCKET_NAME,
-                                    file.filename,
-                                    ExtraArgs = {'ACL':'public-read', 'ContentType' : file.content_type } )
-            
-        except Exception as e:
-            return {'error' : str(e)}, 500
-        
-        # 3. 저장된 사진의 imgUrl 을 만든다.        
-        imgUrl = Config.S3_LOCATION + file.filename
-        
-        # 추가할 술도감의 정보를 DB에 추가한다.
-        try :
-            connection = get_connection()
 
-            query = '''insert into alcohol (name, percent, alcoholType, category, produce, supply, imgUrl)
-                    values (%s, %s, %s, %s, %s, %s, %s);'''
 
-            record = (name, percent, alcoholType, category, produce, supply, imgUrl)
-            cursor = connection.cursor()
-            cursor.execute(query, record)
-            connection.commit()
 
-            cursor.close()
-            connection.close()
 
-        except Error as e :
-            print(e)
-            cursor.close()
-            connection.close()
-            return {'error' : str(e)}, 500
-        
-        return {'result' : 'success'}, 200
+
