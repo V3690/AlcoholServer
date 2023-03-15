@@ -6,6 +6,10 @@ from flask_jwt_extended import create_access_token, get_jwt, jwt_required, get_j
 from email_validator import validate_email, EmailNotValidError # 이메일 유효성 검사 라이브러리 
 from utils import hash_password, check_password
 
+
+## 앱 시작 / 유저 정보 관리 ##
+
+
 # 회원가입
 class UserRegisterResource(Resource):
     
@@ -110,6 +114,7 @@ class UserRegisterResource(Resource):
         # expires_delta는 토큰의 유효기간이다. # timedelta로 지정한다. # timedelta는 datetime에서 가져온다.
 
         return {'access_token': acces_token}, 200 # 200은 성공했다는 의미의 코드
+
 # 로그인
 class UserLoginResource(Resource):
    
@@ -162,11 +167,10 @@ class UserLoginResource(Resource):
 
         return {'nickname' : result_list[0]['nickname'], 'percent' : result_list[0]['percent'],'access_token': acces_token}, 200 # 200은 성공했다는 의미의 코드
 
-
-
-# 로그아웃된 토큰을 저장할 set 만든다.
+## 로그아웃된 토큰을 저장할 set 만든다.
 jwt_blocklist = set() # set은 중복을 허용하지 않는다.
 
+# 로그 아웃
 class UserLogoutResource(Resource) :
 
     # 로그아웃
@@ -179,8 +183,7 @@ class UserLogoutResource(Resource) :
 
         return {'result' : '로그아웃 성공'}, 200
 
-
-# 신규 취향 정보를 POST로 받아서 DB에 저장한다.
+# 회원 추가 정보
 class UserResource(Resource) :
     @jwt_required()
     def post(self) :
@@ -246,126 +249,9 @@ class UserResource(Resource) :
             cursor.close()
             connection.close()
 
-            
-# 유저의 개인정보 페이지 (화면기획서 10번)
-class UserDetailResource(Resource) :
-      
-      # 유저가 닉네임을 수정하면 호출되는 API
-    @jwt_required()
-    def put(self) :
-            # 클라이언트가 보낸 데이터를 받는다.
-            data = request.get_json()
-            # {
-            #     "nickname": "바꾼닉네임"
-            # }
-            user_id = get_jwt_identity()
-            print(data)
-            try:
-                # 닉네임은 중복을 허용하지 않기때문에 DB에 해당 닉네임이 있는지 체크한다.
-                connection = get_connection()
-                cursor = connection.cursor(dictionary=True)
-                cursor.execute(
-                    "SELECT * FROM users WHERE nickname = %s",
-                    (data['nickname'],)
-                )
-                result_list = cursor.fetchall()
-                print(result_list)
-                if len(result_list) > 0 :
-                    return {"result": "fail", "error": "중복된 닉네임입니다."}, 500
-                
-                cursor.execute(
-                    "UPDATE users SET nickname = %s WHERE id = %s",
-                    (data['nickname'], user_id)
-                )
-                connection.commit()
-                return {"result": "success"}, 200
-
-            except Error as e:
-                print(e)
-                connection.rollback() 
-                return {"result": "fail", "error": str(e)}, 500
-            
-            finally:
-                cursor.close()
-                connection.close()
-
-    # 유저가 탈퇴하면 호출되는 API
-    @jwt_required()
-    def delete(self) :
-
-        user_id = get_jwt_identity()
-        try:
-            connection = get_connection()
-            cursor = connection.cursor(dictionary=True)
-            cursor.execute(
-                "DELETE FROM users WHERE id = %s",
-                (user_id,)
-            )
-            connection.commit()
-            
-            jti = get_jwt()['jti'] 
-        
-            jwt_blocklist.add(jti) 
-
-            return {"result": "success"}, 200
-        
-        except Error as e:
-            print(e)
-            connection.rollback() 
-            return {"result": "fail", "error": str(e)}, 500
-        
-        finally:
-            cursor.close()
-            connection.close()
-
-        
-#비밀번호 변경
-class UserPasswordResetResource(Resource) :
-    def put(self,user_id):
-        data = request.get_json()
-
-        if len(data['password']) < 4 or len(data['password']) > 12: 
-            return {'error': '비밀번호는 4자리 이상, 12자리 이하로 입력해주세요.'}, 400 
-        
-        hashed_password = hash_password( data['password'] ) 
-
-        try :
-            # DB에 연결
-            connection = get_connection()
-
-            # 쿼리문 만들기
-            query = '''update users
-                    set password = %s
-                    where email = %s;'''
-
-            record = (hashed_password, user_id )
-
-            # 커서를 가져온다.
-            cursor = connection.cursor()
-
-            # 쿼리문을 커서를 이용해서 실행한다
-            cursor.execute(query, record)
-
-            # 커넥션을 커밋해줘야한다
-            connection.commit()
-
-            # 자원 해제
-            cursor.close()
-            connection.close()
-
-        except Error as e:
-            print(e)
-            cursor.close() 
-            connection.close()
-            return {'error': str(e) }, 500 # 500은 서버에러를 리턴하는 에러코드
-       
-        # user_id를 바로 클라이언트에게 보내면 안되고,
-        # jwt로 암호화 해서, 인증토큰을 보낸다.
 
 
-        return {'result' : 'success'}, 200 # 200은 성공했다는 의미의 코드
-
-
+# 닉네임 변경
 class UserNicknameResetResource(Resource):
     @jwt_required()
     def put(self) :
@@ -416,9 +302,86 @@ class UserNicknameResetResource(Resource):
 
             return {'result' : 'success',}, 200
 
+# 비밀번호 변경
+class UserPasswordResetResource(Resource) :
+    def put(self,user_id):
+        data = request.get_json()
 
-          
+        if len(data['password']) < 4 or len(data['password']) > 12: 
+            return {'error': '비밀번호는 4자리 이상, 12자리 이하로 입력해주세요.'}, 400 
+        
+        hashed_password = hash_password( data['password'] ) 
+
+        try :
+            # DB에 연결
+            connection = get_connection()
+
+            # 쿼리문 만들기
+            query = '''update users
+                    set password = %s
+                    where email = %s;'''
+
+            record = (hashed_password, user_id )
+
+            # 커서를 가져온다.
+            cursor = connection.cursor()
+
+            # 쿼리문을 커서를 이용해서 실행한다
+            cursor.execute(query, record)
+
+            # 커넥션을 커밋해줘야한다
+            connection.commit()
+
+            # 자원 해제
+            cursor.close()
+            connection.close()
+
+        except Error as e:
+            print(e)
+            cursor.close() 
+            connection.close()
+            return {'error': str(e) }, 500 # 500은 서버에러를 리턴하는 에러코드
+       
+        # user_id를 바로 클라이언트에게 보내면 안되고,
+        # jwt로 암호화 해서, 인증토큰을 보낸다.
+
+
+        return {'result' : 'success'}, 200 # 200은 성공했다는 의미의 코드
+
+# 탈퇴
+class UserDetailResource(Resource) :
+    # 유저가 탈퇴하면 호출되는 API
+    @jwt_required()
+    def delete(self) :
+
+        user_id = get_jwt_identity()
+        try:
+            connection = get_connection()
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(
+                "DELETE FROM users WHERE id = %s",
+                (user_id,)
+            )
+            connection.commit()
+            
+            jti = get_jwt()['jti'] 
+        
+            jwt_blocklist.add(jti) 
+
+            return {"result": "success"}, 200
+        
+        except Error as e:
+            print(e)
+            connection.rollback() 
+            return {"result": "fail", "error": str(e)}, 500
+        
+        finally:
+            cursor.close()
+            connection.close()
+
       
+
+
 
 
 
