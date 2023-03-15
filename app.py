@@ -95,11 +95,6 @@ api.add_resource(RekognitionEmotionResource, '/game/emotion')
 api.add_resource(DiceResource, '/game/dice/<int:subjectType_id>/<int:penaltyType_id>')
 api.add_resource(CheersResource, '/game/cheers')
 
-from resource.recipe import RecipeSelectedAlcoholResource, RecipeSelectedIngredientResource, RecipeTotalIngredientResource
-## 레시피 작성 시 선택한 술, 재료, 술 + 재료 데이터 가져오는 API
-api.add_resource(RecipeSelectedAlcoholResource, '/creating/recipe/<int:recipe_id>/selectedAlcohol')
-api.add_resource(RecipeSelectedIngredientResource, '/creating/recipe/<int:recipe_id>/selectedIngredient')
-api.add_resource(RecipeTotalIngredientResource, '/creating/recipe/<int:recipe_id>/totalIngredient')
 
 
 if __name__ == '__main__': 
