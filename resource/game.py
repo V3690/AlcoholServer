@@ -137,7 +137,7 @@ class RekognitionEmotionResource(Resource) :
         try :
             client.upload_fileobj(file,
                                     Config.BUCKET_NAME,
-                                    new_file_name,
+                                    'face/'+ file.filename,
                                     ExtraArgs = {'ACL':'public-read', 'ContentType' : file.content_type } )
         
         except Exception as e:
@@ -150,7 +150,7 @@ class RekognitionEmotionResource(Resource) :
                     aws_access_key_id=Config.ACCESS_KEY,
                     aws_secret_access_key = Config.SECRET_ACCESS)
 
-        response = client.detect_faces(Image={'S3Object':{'Bucket':Config.BUCKET_NAME, 'Name':new_file_name}}, Attributes=['ALL'])
+        response = client.detect_faces(Image={'S3Object':{'Bucket':Config.BUCKET_NAME, 'Name': 'face/' + file.filename}}, Attributes=['ALL'])
 
         # print(response)
 

@@ -71,14 +71,14 @@ class CreatingRecipe(Resource):
             
             client.upload_fileobj(file,
                                     Config.BUCKET_NAME,
-                                    new_file_name,
+                                    'recipe/'+ file.filename,
                                     ExtraArgs = {'ACL':'public-read', 'ContentType' : file.content_type } )
 
         except Exception as e:
             return {'error' : str(e)}, 500
 
         # 3. 저장된 사진의 imgUrl 을 만든다.        
-        imgUrl = Config.S3_LOCATION + new_file_name
+        imgUrl = Config.S3_LOCATION + 'recipe/'+ file.filename
 
         # 4. recipe DB에 저장
         try :
@@ -424,15 +424,15 @@ class CreatingRecipeEdit(Resource):
 
             try :
                 s3.upload_fileobj(file,
-                                    Config.S3_BUCKET,
-                                    file.filename,
+                                    Config.BUCKET_NAME,
+                                    'recipe/' + file.filename,
                                     ExtraArgs = {'ACL':'public-read', 'ContentType':file.content_type} )                 
 
             except Exception as e :
                 return {'error' : str(e)}, 500
 
             # 데이터 베이스에 업데이트 해준다.
-            imgUrl = Config.S3_LOCATION + new_file_name
+            imgUrl = Config.S3_LOCATION + 'recipe/' + file.filename
             try :
                 # DB에 연결
                 connection = get_connection()
@@ -688,15 +688,15 @@ class CreatingRecipeEditMaster(Resource):
 
                 try :
                     s3.upload_fileobj(file,
-                                        Config.S3_BUCKET,
-                                        file.filename,
+                                        Config.BUCKET_NAME,
+                                        'recipe/' + file.filename,
                                         ExtraArgs = {'ACL':'public-read', 'ContentType':file.content_type} )                 
 
                 except Exception as e :
                     return {'error' : str(e)}, 500
 
                 # 데이터 베이스에 업데이트 해준다.
-                imgUrl = Config.S3_LOCATION + new_file_name
+                imgUrl = Config.S3_LOCATION + 'recipe/' + file.filename
                 try :
                     # DB에 연결
                     connection = get_connection()
