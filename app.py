@@ -5,6 +5,7 @@ from config import Config
 from resource.alcohol import AlcoholAddResource, AlcoholDeleteResource, AlcoholListResource, AlcoholRequestResource, AlcoholResource, AlcoholUpdateResource
 from resource.creating import CreatingAlcoholList, CreatingIngredientList, CreatingRecipe, CreatingRecipeEdit, CreatingRecipeEditMaster, CreatingRecipeIngredient, CreatingRecipeIngredientEdit, CreatingSearchAlcohol, CreatingSearchIngredient
 from resource.game import CheersResource, DiceResource, RekognitionEmotionResource
+from resource.like  import LikeAlcoholResource, LikeRecipeResource
 from resource.recipe import RecipeAllListResource, RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource, RecipeMasterallListResource, RecipeMyListResource, RecipeResource, RecipeUserListResource
 from resource.user import jwt_blocklist, UserDetailResource, UserLoginResource, UserLogoutResource, UserNicknameResetResource, UserPasswordResetResource, UserRegisterResource, UserResource
 
@@ -95,7 +96,12 @@ api.add_resource(RekognitionEmotionResource, '/game/emotion')
 api.add_resource(DiceResource, '/game/dice/<int:subjectType_id>/<int:penaltyType_id>')
 api.add_resource(CheersResource, '/game/cheers')
 
+#### 좋아요 #####
 
+#레시피 좋아요
+api.add_resource(LikeRecipeResource, '/recipe/<int:recipe_id>/like')
+#술도감 좋아요
+api.add_resource(LikeAlcoholResource, '/alcohol/<int:alcohol_id>/like')
 
 if __name__ == '__main__': 
     app.debug = True
