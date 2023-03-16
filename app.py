@@ -7,6 +7,7 @@ from resource.creating import CreatingAlcoholList, CreatingIngredientList, Creat
 from resource.game import CheersResource, DiceResource, RekognitionEmotionResource
 from resource.like  import LikeAlcoholResource, LikeRecipeResource
 from resource.recipe import RecipeAllListResource, RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource, RecipeMasterallListResource, RecipeMyListResource, RecipeResource, RecipeUserListResource
+from resource.test import GitActionTestResource
 from resource.user import jwt_blocklist, UserDetailResource, UserLoginResource, UserLogoutResource, UserNicknameResetResource, UserPasswordResetResource, UserRegisterResource, UserResource
 
 app = Flask(__name__)
@@ -108,6 +109,8 @@ api.add_resource(RekognitionEmotionResource, '/game/emotion')
 api.add_resource(DiceResource, '/game/dice/<int:subjectType_id>/<int:penaltyType_id>')
 api.add_resource(CheersResource, '/game/cheers')
 
+# 깃 액션 테스트용
+api.add_resource(GitActionTestResource, '/test')
 
 
 if __name__ == '__main__': 
