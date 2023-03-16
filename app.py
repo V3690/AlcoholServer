@@ -3,13 +3,11 @@ from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from config import Config
 from resource.alcohol import AlcoholAddResource, AlcoholDeleteResource, AlcoholListResource, AlcoholRequestResource, AlcoholResource, AlcoholUpdateResource
-from resource.creating import CreatingAlcoholList, CreatingIngredientList, CreatingRecipe, CreatingRecipeEdit, CreatingRecipeEditMaster, CreatingRecipeIngredient, CreatingRecipeIngredientEdit, CreatingSearchAlcohol, CreatingSearchIngredient
+from resource.creating import CreatingAlcoholList, CreatingIngredientList, CreatingRecipe, CreatingRecipeEdit, CreatingRecipeEditMaster, CreatingRecipeIngredient, CreatingRecipeIngredientEdit, CreatingSearchAlcohol, CreatingSearchIngredient, RecipeSelectedAlcoholResource, RecipeSelectedIngredientResource, RecipeTotalIngredientResource
 from resource.game import CheersResource, DiceResource, RekognitionEmotionResource
 from resource.like  import LikeAlcoholResource, LikeRecipeResource
 from resource.recipe import RecipeAllListResource, RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource, RecipeMasterallListResource, RecipeMyListResource, RecipeResource, RecipeUserListResource
 from resource.user import jwt_blocklist, UserDetailResource, UserLoginResource, UserLogoutResource, UserNicknameResetResource, UserPasswordResetResource, UserRegisterResource, UserResource
-from resource.recipe import RecipeSelectedAlcoholResource, RecipeSelectedIngredientResource, RecipeTotalIngredientResource
-
 
 app = Flask(__name__)
 api = Api(app)
