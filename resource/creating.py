@@ -39,8 +39,10 @@ class CreatingRecipe(Resource):
         file = request.files['img']
 
         # 필수 항목 체크
-        if (title == "") or (percent == "") or (content == "") or (file == "") :
-            return {'error' : '<한글 이름, 도수, 레시피, 이미지>는 필수입니다.'}, 400
+        if (title == "") or (percent == "") or (content == "")  :
+            return {'error' : '<한글 이름, 도수, 레시피, 사진은 필수입니다.'}, 400
+        elif file.filename == "":
+            return {'error' : '<한글 이름, 도수, 레시피, 사진은 필수입니다.'}, 400
 
         print(file.content_type)
         
