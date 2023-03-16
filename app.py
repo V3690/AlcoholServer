@@ -8,7 +8,7 @@ from resource.game import CheersResource, DiceResource, RekognitionEmotionResour
 from resource.like  import LikeAlcoholResource, LikeRecipeResource
 from resource.recipe import RecipeAllListResource, RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource, RecipeMasterallListResource, RecipeMyListResource, RecipeResource, RecipeUserListResource
 from resource.user import jwt_blocklist, UserDetailResource, UserLoginResource, UserLogoutResource, UserNicknameResetResource, UserPasswordResetResource, UserRegisterResource, UserResource
-
+from resource.recipe import RecipeSelectedAlcoholResource, RecipeSelectedIngredientResource, RecipeTotalIngredientResource
 
 
 app = Flask(__name__)
@@ -58,6 +58,7 @@ api.add_resource(RecipeAllListResource,'/recipe/all')
 api.add_resource(RecipeMyListResource,'/recipe/me')
 api.add_resource(RecipeResource, '/recipe/<int:recipe_id>')
 
+
 # 레시피 작성, 재료 등록
 api.add_resource(CreatingRecipe, '/creating/recipe')
 api.add_resource(CreatingRecipeIngredient, '/creating/ingredient')
@@ -74,6 +75,19 @@ api.add_resource(CreatingRecipeEdit,'/creating/recipe/edit/<int:recipe_id>')
 api.add_resource(CreatingRecipeIngredientEdit,'/creating/ingredient/edit/<int:recipe_id>')
 # 전체 레시피 수정, 삭제 (관리자 전용)
 api.add_resource(CreatingRecipeEditMaster,'/creating/recipe/edit/master/<int:recipe_id>')
+
+## 레시피 작성 시 선택한 술, 재료, 술+재료 데이터 가져오는 API
+api.add_resource(RecipeSelectedAlcoholResource, '/creating/recipe/<int:recipe_id>/selectedAlcohol')
+api.add_resource(RecipeSelectedIngredientResource, '/creating/recipe/<int:recipe_id>/selectedIngredient')
+api.add_resource(RecipeTotalIngredientResource, '/creating/recipe/<int:recipe_id>/totalIngredient')
+
+
+##### 좋아요 #####
+
+# 레시피 좋아요
+api.add_resource(LikeRecipeResource, '/recipe/<int:recipe_id>/like')
+# 술도감 좋아요
+api.add_resource(LikeAlcoholResource, '/alcohol/<int:alcohol_id>/like')
 
 
 ##### 술도감 메뉴 #####
@@ -96,15 +110,11 @@ api.add_resource(RekognitionEmotionResource, '/game/emotion')
 api.add_resource(DiceResource, '/game/dice/<int:subjectType_id>/<int:penaltyType_id>')
 api.add_resource(CheersResource, '/game/cheers')
 
-#### 좋아요 #####
 
-#레시피 좋아요
-api.add_resource(LikeRecipeResource, '/recipe/<int:recipe_id>/like')
-#술도감 좋아요
-api.add_resource(LikeAlcoholResource, '/alcohol/<int:alcohol_id>/like')
 
 if __name__ == '__main__': 
     app.debug = True
     app.run() # debug=True 는 개발할때만 사용해야함 # 배포할때는 False로 바꿔야함 
     # debug=True 는 코드를 수정하면, 서버를 재시작하지 않아도, 자동으로 코드가 반영됨
     # 디버그 모드를 사용하려면 set FLASK_ENV=development 를 cmd에 입력해야함
+

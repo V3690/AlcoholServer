@@ -306,16 +306,179 @@ class CreatingSearchIngredient(Resource):
 
 
 
-# 선택한 술/재료 불러오기 (화면에 나타내기) -- 개발 필요
-#
-#
-#
-#
+# 레시피 작성 중 - 선택한 술재료 불러오기 (화면에 나타내기)
+class RecipeSelectedAlcoholResource(Resource):
+    @jwt_required()
+    def get(self,recipe_id) :
+        
+        user_id = get_jwt_identity()
+
+        try :
+            connection = get_connection()
+
+            query = '''select a.name
+                        from recipe r
+                        join recipeAlcohol ra
+                        on r.id = ra.recipeId
+                        join alcohol a
+                        on ra.alcoholId = a.id
+                        where r.id = %s and r.userId = %s'''
+
+            record = (recipe_id, user_id )
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query, record)
+            
+            result_list = cursor.fetchall()
+            print(result_list)
+
+            
+
+            data_list = []
+            for i in range(0, len(result_list)-1):
+                for data in result_list[i].values():
+                    data_list.append(data)
+                
+
+
+            cursor.close()
+            connection.close()
+    
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+        return { "result" : "success" ,
+                "alcohol" : data_list ,
+                "count" : len(data_list)}, 200
+
+# 레시피 작성 중 - 선택한 부재료 불러오기 (화면에 나타내기)
+class RecipeSelectedIngredientResource(Resource):
+    @jwt_required()
+    def get(self,recipe_id) :
+
+        
+        user_id = get_jwt_identity()
+
+
+        try :
+            connection = get_connection()
+
+            query = '''select i.name
+                    from recipe r
+                    join recipeIngredient ri
+                    on r.id = ri.recipeId
+                    join ingredient i
+                    on ri.ingredientId = i.id
+                    where r.id = %s and r.userId = %s;
+                    '''
+
+            record = (recipe_id, user_id )
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query, record)
+            
+            result_list = cursor.fetchall()
+
+            data_list = []
+
+            for i in range(0, len(result_list)-1):
+                for data in result_list[i].values():
+                    data_list.append(data)
+                
+
+
+            cursor.close()
+            connection.close()
+    
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+        return { "result" : "success" ,
+                "ingredient" : data_list ,
+                "count" : len(data_list)}, 200  
+
+# 레시피 작성 중 - 선택한 술+부재료 한 번에 불러오기 (화면에 나타내기)
+class RecipeTotalIngredientResource(Resource):
+    @jwt_required()
+    def get(self,recipe_id) :
+
+        user_id = get_jwt_identity()
+
+        try :
+            connection = get_connection()
+
+            ## 재료 데이터 가져오는 쿼리문
+
+            query = '''select i.name
+                    from recipe r
+                    join recipeIngredient ri
+                    on r.id = ri.recipeId
+                    join ingredient i
+                    on ri.ingredientId = i.id
+                    where r.id = %s and r.userId = %s;
+                    '''
+
+            record = (recipe_id, user_id )
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query, record)
+            
+            ingredient_list = cursor.fetchall()
+
+            ingredient_data_list = []
+
+            for i in range(0, len(ingredient_list)-1):
+                for data in ingredient_list[i].values():
+                    ingredient_data_list.append(data)
+
+
+            ## 술 데이터 가져오는 쿼리문
+
+            query = '''select a.name
+                        from recipe r
+                        join recipeAlcohol ra
+                        on r.id = ra.recipeId
+                        join alcohol a
+                        on ra.alcoholId = a.id
+                        where r.id = %s and r.userId = %s'''
+
+            record = (recipe_id, user_id )
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query, record)
+            
+            alcohol_list = cursor.fetchall()
+            print(alcohol_list)
+
+
+
+            alcohol_data_list = []
+            for i in range(0, len(alcohol_list)-1):
+                for data in alcohol_list[i].values():
+                    alcohol_data_list.append(data)
+
+
+            cursor.close()
+            connection.close()
+    
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+        return { "result" : "success" ,
+                "totalIngredient" : alcohol_data_list + ingredient_data_list,
+                "count" : len(alcohol_data_list + ingredient_data_list)}, 200 
 
 
 
 # 본인 레시피 수정, 삭제
-# 내가쓴 레시피 수정 및 삭제
 class CreatingRecipeEdit(Resource):
     @jwt_required()
     def put(self, recipe_id) :
@@ -527,7 +690,6 @@ class CreatingRecipeEdit(Resource):
 
 
 # 본인 레시피 재료 수정
-#내가 쓴 레시피 수정중 부재료 수정
 class CreatingRecipeIngredientEdit(Resource):
     @jwt_required()
     def put(self, recipe_id):
