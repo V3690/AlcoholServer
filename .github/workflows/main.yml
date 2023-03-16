@@ -1,0 +1,28 @@
+name: serverless deploy
+
+on:
+  push:            # 푸쉬할때마다
+    branches:
+      - main
+      - develop
+  pull_request:    # 풀리퀘스트 할때마다
+    branches:
+      - main
+      - develop
+
+jobs:
+  deploy:
+    name: deploy # 배포
+    runs-on: ubuntu-latest # 우분투 최신 버전 사용
+
+    steps:
+      - uses: actions/checkout@v3 # 깃허브 저장소에서 소스코드 가져오기
+
+      - name: Install SLS and Deploy # 서버리스 설치 및 배포
+        uses: serverless/github-action@v3 # 서버리스에서 만든 액션 사용
+        with:                               # -c == 다음을 실행하라는것
+          args: -c "sls plugin install -n serverless-wsgi && sls plugin install -n serverless-python-requirements && sls deploy" # 플러그인 다운 및 배포 # && 으로 실행구문분리
+          entrypoint: /bin/sh   # bin의 쉘로 실행하라는것
+        env:     # 권한설정
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} # AWS 접근 키
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} # AWS 비밀 키
