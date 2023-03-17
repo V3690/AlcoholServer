@@ -509,7 +509,7 @@ class RecipeResource(Resource):
         try :
             connection = get_connection()
 
-            query = '''select r.title, count(l.userId) as cnt , r.percent ,a.alcoholType, r.userId , r.engTitle,r.intro, r.content, GROUP_CONCAT(DISTINCT ig.name SEPARATOR ', ')as '재료'
+            query = '''select r.title, count(l.userId) as likeCnt , r.percent ,a.alcoholType, r.userId , r.engTitle,r.intro, r.content,r.imgUrl, GROUP_CONCAT(DISTINCT ig.name SEPARATOR ', ')as ingredient ,r.createdAt ,r.updatedAt
                     from recipe r
                     left join likeRecipe l
                     on r.id = l.recipeId
@@ -535,12 +535,12 @@ class RecipeResource(Resource):
 
             if result_list[0]['title'] is None:
                 return {'error': '잘못된 알콜 아이디 입니다.'}, 400        
-
-            # i = 0
-            # for row in result_list :
-            #     result_list[i]['createdAt'] = row['createdAt'].isoformat()
-            #     result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
-            #     i = i + 1
+            print(result_list)
+            i = 0
+            for row in result_list :
+                result_list[i]['createdAt'] = row['createdAt'].isoformat()
+                result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
+                i = i + 1
 
             cursor.close()
             connection.close()
@@ -552,8 +552,7 @@ class RecipeResource(Resource):
             return {"error" : str(e)}, 500
                 
         # print(result_list)
-        return { "result" : "success" ,
-                "alcohol" : result_list[0] }, 200
+        return { "recipeOne" : result_list[0] }, 200
 
 
 
