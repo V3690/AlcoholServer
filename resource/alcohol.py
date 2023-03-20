@@ -67,9 +67,14 @@ class AlcoholResource(Resource):
         try :
 
             connection = get_connection()
-            query = '''select id, name, percent, alcoholType, category, produce, supply, imgUrl
-                    from alcohol
-                    where id = %s;'''
+            query = '''select a.id, a.name, a.percent, a.alcoholType, a.category, a.produce, a.supply, a.imgUrl, count(l.alcoholId) as likeCnt
+                    from alcohol a
+                    left join likeAlcohol l
+                    on a.id = l.alcoholId
+                    where id = %s
+                    group by l.alcoholId;'''
+                                
+
                                 
             record = (alcohol_id, )
             cursor = connection.cursor(dictionary= True)
