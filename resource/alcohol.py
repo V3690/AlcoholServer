@@ -64,19 +64,22 @@ class AlcoholListResource(Resource):
 class AlcoholResource(Resource):
     @jwt_required()
     def get(self, alcohol_id) :
+        user_id = get_jwt_identity()
         try :
 
             connection = get_connection()
-            query = '''select a.id, a.name, a.percent, a.alcoholType, a.category, a.produce, a.supply, a.imgUrl, count(l.alcoholId) as likeCnt
+            query = '''select a.id, a.name, a.percent, a.alcoholType, a.category, a.produce, a.supply, a.imgUrl, count(l.alcoholId) as likeCnt, if(lr.userId is null, 0 , 1) as isLike 
                     from alcohol a
                     left join likeAlcohol l
                     on a.id = l.alcoholId
+                    left join likeAlcohol lr
+                    on a.id = lr.alcoholId and lr.userId = %s
                     where id = %s
                     group by l.alcoholId;'''
                                 
 
                                 
-            record = (alcohol_id, )
+            record = (user_id, alcohol_id)
             cursor = connection.cursor(dictionary= True)
             cursor.execute(query, record)
 

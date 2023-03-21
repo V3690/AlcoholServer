@@ -41,15 +41,18 @@ class RecipeMasterListResource(Resource):
 class RecipeHonorListResource(Resource):
     @jwt_required()
     def get(self):
+        user_id = get_jwt_identity()
         offset = request.args.get('offset')
         limit = request.args.get('limit')
         try:
             conn = get_connection()
             cursor = conn.cursor(dictionary=True)
             query = """
-            SELECT r.id, r.imgUrl, COUNT(l.recipeId) AS likeCount
+            SELECT r.id, r.imgUrl, COUNT(l.recipeId) AS likeCount, if(lr.userId is null, 0 , 1) as isLike 
             FROM recipe r LEFT JOIN likeRecipe l 
             ON r.id = l.recipeId 
+            LEFT JOIN likeRecipe lr
+            ON r.id = lr.recipeId AND lr.userId = """ + str(user_id) + """
             WHERE DATE_SUB(CURDATE(), INTERVAL 2 WEEK) <= r.createdAt 
             GROUP BY r.id ORDER BY likeCount DESC 
             LIMIT """ + offset + ", " + limit + ";"
