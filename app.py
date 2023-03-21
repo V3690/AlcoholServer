@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from config import Config
-from resource.alcohol import AlcoholAddResource, AlcoholDeleteResource, AlcoholListResource, AlcoholRequestResource, AlcoholResource, AlcoholUpdateResource
+from resource.alcohol import AlcoholSearchKeyword, AlcoholAddResource, AlcoholDeleteResource, AlcoholListResource, AlcoholRequestResource, AlcoholResource, AlcoholUpdateResource
 from resource.creating import CreatingAlcoholList, CreatingIngredientList, CreatingRecipe, CreatingRecipeEdit, CreatingRecipeEditMaster, CreatingRecipeIngredient, CreatingRecipeIngredientEdit, CreatingSearchAlcohol, CreatingSearchIngredient, RecipeSelectedAlcoholResource, RecipeSelectedIngredientResource, RecipeTotalIngredientResource
 from resource.game import CheersResource, DiceResource, RekognitionEmotionResource
 from resource.like  import LikeAlcoholResource, LikeRecipeResource
@@ -58,6 +58,7 @@ api.add_resource(RecipeMyListResource,'/recipe/me')
 api.add_resource(RecipeResource, '/recipe/<int:recipe_id>')
 
 
+
 # 레시피 작성, 재료 등록
 api.add_resource(CreatingRecipe, '/creating/recipe')
 api.add_resource(CreatingRecipeIngredient, '/creating/ingredient')
@@ -96,6 +97,9 @@ api.add_resource(AlcoholListResource, '/alcohol')
 api.add_resource(AlcoholResource, '/alcohol/<int:alcohol_id>')
 # 유저의 요청(데이터 수정/추가)
 api.add_resource(AlcoholRequestResource, '/alcohol/request')
+# 술도감에서 키워드로 목록 가져오기
+api.add_resource(AlcoholSearchKeyword, '/alcohol/search')
+
 
 # 술 추가, 수정, 삭제 (관리자 전용)
 api.add_resource(AlcoholAddResource, '/alcohol/add')
