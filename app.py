@@ -6,7 +6,7 @@ from resource.alcohol import AlcoholSearchKeyword, AlcoholAddResource, AlcoholDe
 from resource.creating import CreatingAlcoholList, CreatingIngredientList, CreatingRecipe, CreatingRecipeEdit, CreatingRecipeEditMaster, CreatingRecipeIngredient, CreatingRecipeIngredientEdit, CreatingSearchAlcohol, CreatingSearchIngredient, RecipeSelectedAlcoholResource, RecipeSelectedIngredientResource, RecipeTotalIngredientResource
 from resource.game import CheersResource, DiceResource, RekognitionEmotionResource
 from resource.like  import LikeAlcoholResource, LikeRecipeResource
-from resource.recipe import RecipeAllListResource, RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource, RecipeMasterallListResource, RecipeMyListResource, RecipeResource, RecipeUserListResource
+from resource.recipe import RecipeMyListAllResource ,RecipeAllListResource, RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource, RecipeMasterallListResource, RecipeMyListPercentResource, RecipeResource, RecipeUserListResource
 from resource.test import GitActionTestResource
 from resource.user import jwt_blocklist, UserDetailResource, UserLoginResource, UserLogoutResource, UserNicknameResetResource, UserPasswordResetResource, UserRegisterResource, UserResource
 
@@ -54,9 +54,11 @@ api.add_resource(UserDetailResource, '/user/detail')
 api.add_resource(RecipeMasterallListResource,'/recipe/Masterall')
 api.add_resource(RecipeUserListResource,'/recipe/user')
 api.add_resource(RecipeAllListResource,'/recipe/all')
-api.add_resource(RecipeMyListResource,'/recipe/me')
 api.add_resource(RecipeResource, '/recipe/<int:recipe_id>')
-
+# 내 레시피 도수로 필터링 해서 가져오기
+api.add_resource(RecipeMyListPercentResource,'/recipe/me')
+# 내 레시피 전체 리스트 가져오기
+api.add_resource(RecipeMyListAllResource, '/recipe/me/list')
 
 
 # 레시피 작성, 재료 등록

@@ -449,12 +449,14 @@ class RecipeAllListResource(Resource):
                 "items" : result_list , 
                 "count" : len(result_list)}, 200
 
-# 레시피 목록 (본인)
-class RecipeMyListResource(Resource):
+
+# 내 레시피 전체 리스트
+class RecipeMyListAllResource(Resource):
     @jwt_required()
-    def get(self):
+    def get(self) :
+      
         user_id = get_jwt_identity()
-        order = request.args.get('order')
+
         offset = request.args.get('offset')
         limit = request.args.get('limit')
         
@@ -462,18 +464,17 @@ class RecipeMyListResource(Resource):
         try :
             connection = get_connection()
 
-            query = '''select r.title, r.percent , r.createdAt ,r.updatedAt
-                    from recipe r
-                    left join likeRecipe l
-                    on r.id = l.recipeId
-                    where r.userId= %s
-                    group by r.id
-                    order by ''' + order + '''  desc
+            query = '''select userId, id as recipeId ,title, percent , createdAt ,updatedAt
+                    from recipe
+                    where userId = %s
+                    order by createdAt desc
                     limit ''' + offset + ''', '''+ limit + ''';'''
 
+
             record = (user_id, )
+        
             cursor = connection.cursor(dictionary= True)
-            cursor.execute(query, record)
+            cursor.execute(query,record)
 
             result_list = cursor.fetchall()
 
@@ -499,6 +500,61 @@ class RecipeMyListResource(Resource):
         return {"result" : "success" ,
                 "items" : result_list , 
                 "count" : len(result_list)}, 200
+    
+
+# 레시피 목록 (본인) - 도수 필터링
+class RecipeMyListPercentResource(Resource):
+    @jwt_required()
+    def get(self) :
+      
+        user_id = get_jwt_identity()
+
+        order = request.args.get('order')
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+        
+
+        try :
+            connection = get_connection()
+
+            query = '''select userId, id as recipeId ,title, percent , createdAt ,updatedAt
+                    from recipe
+                    where userId = %s and percent = ''' + order + '''
+                    order by createdAt desc
+                    limit ''' + offset + ''', '''+ limit + ''';'''
+
+
+            record = (user_id, )
+        
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query,record)
+
+            result_list = cursor.fetchall()
+
+          
+
+            i = 0
+            for row in result_list :
+                result_list[i]['createdAt'] = row['createdAt'].isoformat()
+                result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
+                i = i + 1
+
+            cursor.close()
+            connection.close()
+    
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+
+        return {"result" : "success" ,
+                "items" : result_list , 
+                "count" : len(result_list)}, 200
+    
+
 
 # 레시피 1개 세부 정보
 class RecipeResource(Resource):
