@@ -504,12 +504,12 @@ class RecipeMyListResource(Resource):
 class RecipeResource(Resource):
     @jwt_required()
     def get(self,recipe_id) :
-    
+        user_id = get_jwt_identity()
 
         try :
             connection = get_connection()
 
-            query = '''select r.title, count(l.userId) as likeCnt , r.percent ,a.alcoholType, u.nickname , r.engTitle,r.intro, r.content,r.imgUrl, GROUP_CONCAT(DISTINCT ig.name SEPARATOR ', ')as ingredient ,r.createdAt ,r.updatedAt, r.userId
+            query = '''select r.title, count(l.userId) as likeCnt , r.percent ,a.alcoholType, u.nickname , r.engTitle,r.intro, r.content,r.imgUrl, GROUP_CONCAT(DISTINCT ig.name SEPARATOR ', ')as ingredient ,r.createdAt ,r.updatedAt, r.userId, if(lr.userId is null, 0 , 1) as isLike
                     from recipe r
                     left join likeRecipe l
                     on r.id = l.recipeId
@@ -523,11 +523,13 @@ class RecipeResource(Resource):
                     on ig.id = ri.ingredientId
                     left join users u
                     on u.id = r.userId
+                    left join likeRecipe lr
+                    on lr.recipeId = r.id and lr.userId = %s
                     where r.id = %s
                     group by l.recipeId 
                     order by count(l.userId) desc;'''
 
-            record = (recipe_id, )
+            record = (user_id, recipe_id )
             cursor = connection.cursor(dictionary= True)
             cursor.execute(query, record)
             
