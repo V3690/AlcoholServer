@@ -453,6 +453,8 @@ class RecipeAllListResource(Resource):
                 "count" : len(result_list)}, 200
 
 
+
+## 내 레시피 관련
 # 내 레시피 전체 리스트
 class RecipeMyListAllResource(Resource):
     @jwt_required()
@@ -557,7 +559,57 @@ class RecipeMyListPercentResource(Resource):
                 "items" : result_list , 
                 "count" : len(result_list)}, 200
     
+# 레시피 키워드로 가져오기 
+class RecipeMyListKeywordResource(Resource):
+    @jwt_required()
+    def get(self) :
+      
+        user_id = get_jwt_identity()
 
+        keyword = request.args.get('keyword')
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+        
+
+        try :
+            connection = get_connection()
+
+            query = '''select userId,id as recipeId ,title, percent , createdAt ,updatedAt
+                    from recipe
+                    where userId = %s and title like "%''' +keyword+ '''%"
+                    order by updatedAt desc;
+                    limit ''' + offset + ''', '''+ limit + ''';'''
+
+
+            record = (user_id, )
+        
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query,record)
+
+            result_list = cursor.fetchall()
+
+          
+
+            i = 0
+            for row in result_list :
+                result_list[i]['createdAt'] = row['createdAt'].isoformat()
+                result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
+                i = i + 1
+
+            cursor.close()
+            connection.close()
+    
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+
+        return {"result" : "success" ,
+                "items" : result_list , 
+                "count" : len(result_list)}, 200
 
 # 레시피 1개 세부 정보
 class RecipeResource(Resource):
