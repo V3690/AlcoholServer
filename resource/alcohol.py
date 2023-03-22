@@ -37,8 +37,22 @@ class AlcoholListResource(Resource):
             elif order == "name":
                 order = "a.name asc"
 
+            # 0: 전체 1 : 약, 2: 중, 3:강 
+            # cnt : 인기순 , createdAt :최신순, name: 한글순
+
+            # 전체 선택시
+            if percent == "0":
+
+                query = '''select a.id, a.name, a.percent, a.alcoholType, a.category, a.produce, a.supply, a.imgUrl, count(l.alcoholId) as cnt
+                        from alcohol a
+                        left join likeAlcohol l
+                        on a.id = l.alcoholId
+                        group by a.id
+                        order by ''' + order + ''' , a.percent desc
+                        limit ''' + offset + ''', '''+ limit + ''';'''
+                
             # 도수가 약일 때
-            if percent == "1":
+            elif percent == "1":
 
                 query = '''select a.id, a.name, a.percent, a.alcoholType, a.category, a.produce, a.supply, a.imgUrl, count(l.alcoholId) as cnt
                         from alcohol a
@@ -70,7 +84,19 @@ class AlcoholListResource(Resource):
                             where a.percent>=21
                             group by a.id
                             order by ''' + order + ''' , a.percent desc
-                            limit ''' + offset + ''', '''+ limit + ''';'''  
+                            limit ''' + offset + ''', '''+ limit + ''';'''
+
+
+            # 도수가 ? 일 때 => null 값인 데이터
+            elif  percent == "4":
+                query = '''select a.id, a.name, a.percent, a.alcoholType, a.category, a.produce, a.supply, a.imgUrl, count(l.alcoholId) as cnt
+                            from alcohol a
+                            left join likeAlcohol l
+                            on a.id = l.alcoholId
+                            where a.percent = null
+                            group by a.id
+                            order by ''' + order + ''' , a.percent desc
+                            limit ''' + offset + ''', '''+ limit + ''';'''
             cursor = connection.cursor(dictionary=True)
             cursor.execute(query, )
 
