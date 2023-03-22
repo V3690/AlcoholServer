@@ -17,6 +17,7 @@ class AlcoholListResource(Resource):
     @jwt_required()
     def get(self) :
         # user_id = get_jwt_identity()
+        keyword = request.args.get('keyword')
         percent = request.args.get('percent')
         order = request.args.get('order')
         offset = request.args.get('offset')
@@ -47,6 +48,7 @@ class AlcoholListResource(Resource):
                         from alcohol a
                         left join likeAlcohol l
                         on a.id = l.alcoholId
+                        where name like "%''' +keyword +'''%"
                         group by a.id
                         order by ''' + order + ''' , a.percent desc
                         limit ''' + offset + ''', '''+ limit + ''';'''
@@ -58,7 +60,7 @@ class AlcoholListResource(Resource):
                         from alcohol a
                         left join likeAlcohol l
                         on a.id = l.alcoholId
-                        where percent <= 10
+                        where percent <= 10 and name like "%''' +keyword +'''%"
                         group by a.id
                         order by ''' + order + ''' , a.percent desc
                         limit ''' + offset + ''', '''+ limit + ''';'''
@@ -69,7 +71,7 @@ class AlcoholListResource(Resource):
                             from alcohol a
                             left join likeAlcohol l
                             on a.id = l.alcoholId
-                            where percent>=11 and percent<=20
+                            where percent>=11 and percent<=20 and name like "%''' +keyword +'''%"
                             group by a.id
                             order by ''' + order + ''' , a.percent desc
                             limit ''' + offset + ''', '''+ limit + ''';'''
@@ -81,7 +83,7 @@ class AlcoholListResource(Resource):
                             from alcohol a
                             left join likeAlcohol l
                             on a.id = l.alcoholId
-                            where a.percent>=21
+                            where a.percent>=21 and name like "%''' +keyword +'''%"
                             group by a.id
                             order by ''' + order + ''' , a.percent desc
                             limit ''' + offset + ''', '''+ limit + ''';'''
@@ -93,7 +95,7 @@ class AlcoholListResource(Resource):
                             from alcohol a
                             left join likeAlcohol l
                             on a.id = l.alcoholId
-                            where a.percent = null
+                            where a.percent = null and name like "%''' +keyword +'''%"
                             group by a.id
                             order by ''' + order + ''' , a.percent desc
                             limit ''' + offset + ''', '''+ limit + ''';'''
