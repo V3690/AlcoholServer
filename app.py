@@ -8,7 +8,7 @@ from resource.game import CheersResource, DiceResource, RekognitionEmotionResour
 from resource.like  import LikeAlcoholResource, LikeRecipeResource
 from resource.recipe import RecipeMyListKeywordResource, RecipeMyListAllResource ,RecipeAllListResource, RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource, RecipeMasterallListResource, RecipeMyListPercentResource, RecipeResource, RecipeUserListResource
 from resource.test import GitActionTestResource
-from resource.user import jwt_blocklist, UserNicknameResource,UserDetailResource, UserLoginResource, UserLogoutResource, UserNicknameResetResource, UserPasswordResetResource, UserRegisterResource, UserResource
+from resource.user import jwt_blocklist,UserDetailResource, UserLoginResource, UserLogoutResource, UserNicknameResetResource, UserPasswordResetResource, UserRegisterResource, UserResource
 
 app = Flask(__name__)
 api = Api(app)
@@ -46,9 +46,6 @@ api.add_resource(RecipeLikeSearchResource, '/recipe/favorite/search')
 api.add_resource(UserNicknameResetResource,'/user/edit/nickname')
 api.add_resource(UserPasswordResetResource,'/user/edit/password')
 api.add_resource(UserDetailResource, '/user/detail') 
-
-# 내 닉네임 가져오기
-api.add_resource(UserNicknameResource, '/user/nickname')
 
 
 ##### 레시피 메뉴 #####
