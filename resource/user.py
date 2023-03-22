@@ -248,6 +248,58 @@ class UserResource(Resource) :
 
 
 
+# 닉네임 변경
+class UserNicknameResetResource(Resource):
+    @jwt_required()
+    def put(self) :
+        user_id = get_jwt_identity()
+        data = request.get_json() 
+        if "nickname" in data:
+            # 닉네임이 이미 존재하는지 확인한다.
+            try:
+                connection = get_connection()
+                query = """
+                    SELECT nickname FROM users WHERE nickname = %s;
+                    """
+                cursor = connection.cursor()
+                cursor.execute(query, (data['nickname'], ))
+                record = cursor.fetchone()
+                cursor.close()
+                connection.close()
+
+                if record:
+                    return {'error': '이미 존재하는 닉네임입니다.'}, 400
+            except Error as e:
+                print(e)
+                cursor.close()
+                connection.close()
+                return {'error': str(e) }, 500 # 500은 서버에러를 리턴하는 에러코드
+
+            try :
+                connection = get_connection()
+
+                query = f'''update users 
+                    set nickname = %s
+                        where id = {user_id};'''
+
+                record = (data['nickname'],)
+                cursor = connection.cursor(dictionary= True)
+                cursor.execute(query, record)
+
+                connection.commit()
+
+                cursor.close()
+                connection.close()
+
+            except Error as e :
+                print(e)
+                cursor.close()
+                connection.close()
+                return {'error' : str(e)}, 500
+
+            return {'result' : 'success',}, 200
+
+
 
 class UserNicknameResource(Resource):
     @jwt_required()
