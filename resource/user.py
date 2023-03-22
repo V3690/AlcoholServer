@@ -298,6 +298,54 @@ class UserNicknameResetResource(Resource):
 
             return {'result' : 'success',}, 200
 
+
+
+class UserNicknameResource(Resource):
+    @jwt_required()
+    def get(self) :
+        user_id = get_jwt_identity()
+        try :
+
+            connection = get_connection()
+
+            query = '''select id, nickname
+                    from users
+                    where id = %s;'''
+                                
+
+                                
+            record = (user_id, )
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query, record)
+
+            result_list = cursor.fetchall()
+
+            if result_list[0]['id'] is None :
+                return{'error' : '잘못된 알콜 아이디 입니다.'}, 400
+
+            # i = 0
+            # for row in result_list :
+            #     result_list[i]['createdAt'] = row['createdAt'].isoformat()
+            #     result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
+            #     i = i + 1
+
+            cursor.close()
+            connection.close()
+
+
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        
+        return { "result" : "success" ,
+                "alcohol" : result_list[0] }, 200
+    
+    
+
+
 # 비밀번호 변경
 class UserPasswordResetResource(Resource) :
     @jwt_required()
