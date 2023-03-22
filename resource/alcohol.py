@@ -17,22 +17,60 @@ class AlcoholListResource(Resource):
     @jwt_required()
     def get(self) :
         # user_id = get_jwt_identity()
-
+        percent = request.args.get('percent')
         order = request.args.get('order')
         offset = request.args.get('offset')
         limit = request.args.get('limit')
 
+
+
         try :
             connection = get_connection()
 
-            query = '''select a.id, a.name, a.percent, a.alcoholType, a.category, a.produce, a.supply, a.imgUrl, count(l.alcoholId) as cnt
-                    from alcohol a
-                    left join likeAlcohol l
-                    on a.id = l.alcoholId
-                    group by a.id
-                    order by ''' + order + '''  desc, name asc
-                    limit ''' + offset + ''', '''+ limit + ''';'''
 
+            if order == "cnt":
+                order = "cnt desc"
+
+            elif order == "createdAt":
+                order = "a.createdAt desc"
+
+            elif order == "name":
+                order = "a.name asc"
+
+            # 도수가 약일 때
+            if percent == "1":
+
+                query = '''select a.id, a.name, a.percent, a.alcoholType, a.category, a.produce, a.supply, a.imgUrl, count(l.alcoholId) as cnt
+                        from alcohol a
+                        left join likeAlcohol l
+                        on a.id = l.alcoholId
+                        where percent <= 10
+                        group by a.id
+                        order by ''' + order + ''' , a.percent desc
+                        limit ''' + offset + ''', '''+ limit + ''';'''
+                
+            # 도수가 중일 때
+            elif percent == "2":
+                query = '''select a.id, a.name, a.percent, a.alcoholType, a.category, a.produce, a.supply, a.imgUrl, count(l.alcoholId) as cnt
+                            from alcohol a
+                            left join likeAlcohol l
+                            on a.id = l.alcoholId
+                            where percent>=11 and percent<=20
+                            group by a.id
+                            order by ''' + order + ''' , a.percent desc
+                            limit ''' + offset + ''', '''+ limit + ''';'''
+                
+
+            # 도수가 강일 때
+            elif percent == "3":
+                query = '''select a.id, a.name, a.percent, a.alcoholType, a.category, a.produce, a.supply, a.imgUrl, count(l.alcoholId) as cnt
+                            from alcohol a
+                            left join likeAlcohol l
+                            on a.id = l.alcoholId
+                            where a.percent>=21
+                            group by a.id
+                            order by ''' + order + ''' , a.percent desc
+                            limit ''' + offset + ''', '''+ limit + ''';'''  
             cursor = connection.cursor(dictionary=True)
             cursor.execute(query, )
 
