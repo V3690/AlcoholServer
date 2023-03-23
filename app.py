@@ -6,7 +6,7 @@ from resource.alcohol import AlcoholSearchKeyword, AlcoholAddResource, AlcoholDe
 from resource.creating import CreatingAlcoholList, CreatingIngredientList, CreatingRecipe, CreatingRecipeEdit, CreatingRecipeEditMaster, CreatingRecipeIngredient, CreatingRecipeIngredientEdit, CreatingSearchAlcohol, CreatingSearchIngredient, RecipeSelectedAlcoholResource, RecipeSelectedIngredientResource, RecipeTotalIngredientResource
 from resource.game import CheersResource, DiceResource, RekognitionEmotionResource
 from resource.like  import LikeAlcoholResource, LikeRecipeResource
-from resource.recipe import RecipeMyListKeywordResource, RecipeMyListAllResource ,RecipeAllListResource, RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource, RecipeMasterallListResource, RecipeMyListPercentResource, RecipeResource, RecipeUserListResource
+from resource.recipe import RecipeListKeywordResource, RecipeMyListKeywordResource, RecipeMyListAllResource ,RecipeAllListResource, RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource, RecipeMasterallListResource, RecipeMyListPercentResource, RecipeResource, RecipeUserListResource
 from resource.test import GitActionTestResource
 from resource.user import jwt_blocklist, UserDetailResource, UserLoginResource, UserLogoutResource, UserNicknameResetResource, UserPasswordResetResource, UserRegisterResource, UserResource
 
@@ -61,6 +61,8 @@ api.add_resource(RecipeMyListPercentResource,'/recipe/me')
 api.add_resource(RecipeMyListAllResource, '/recipe/me/list')
 # 키워드로 내 레시피 가져오기
 api.add_resource(RecipeMyListKeywordResource, '/recipe/me/search')
+#키워드로 전체 레시피 가저오기
+api.add_resource(RecipeListKeywordResource,'/recipe/search')
 
 
 # 레시피 작성, 재료 등록
