@@ -718,7 +718,57 @@ class RecipeResource(Resource):
         return { "recipeOne" : result_list[0] }, 200
 
 
+#레시피 검색(레시피페이지에서)
+class RecipeListKeywordResource(Resource):
+    @jwt_required()
+    def get(self) :
+      
+    
 
+        keyword = request.args.get('keyword')
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+        
+
+        try :
+            connection = get_connection()
+
+            query = '''select userId,id as recipeId ,title, percent , createdAt ,updatedAt
+                    from recipe
+                    where title like "%''' +keyword+ '''%"
+                    order by updatedAt desc;
+                    limit ''' + offset + ''', '''+ limit + ''';'''
+
+
+           
+        
+            cursor = connection.cursor(dictionary= True)
+            cursor.execute(query,)
+
+            result_list = cursor.fetchall()
+
+          
+
+            i = 0
+            for row in result_list :
+                result_list[i]['createdAt'] = row['createdAt'].isoformat()
+                result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
+                i = i + 1
+
+            cursor.close()
+            connection.close()
+    
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+
+        return {"result" : "success" ,
+                "items" : result_list , 
+                "count" : len(result_list)}, 200
 
 
 
