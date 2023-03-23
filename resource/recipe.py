@@ -405,22 +405,75 @@ class RecipeUserListResource(Resource):
     def get(self) :
       
 
+
+
+        # user_id = get_jwt_identity()
+        percent = request.args.get('percent')
         order = request.args.get('order')
         offset = request.args.get('offset')
         limit = request.args.get('limit')
-        
 
         try :
             connection = get_connection()
 
-            query = '''select r.title, r.percent , count(l.userId) as cnt
-                    from recipe r
-                    left join likeRecipe l
-                    on r.id = l.recipeId
-                    where r.userId NOT IN(1)
-                    group by r.id
-                    order by ''' + order + '''  desc
-                    limit ''' + offset + ''', '''+ limit + ''';'''
+            if order == "cnt":
+                order = "cnt desc"
+
+            elif order == "createdAt":
+                order = "r.createdAt desc"
+
+            elif order == "title":
+                order = "r.title asc"            
+
+            if percent == "0":
+
+                query = f'''select r.id, r.title, r.percent , count(l.userId) as cnt
+                        from recipe r
+                        left join likeRecipe l
+                        on r.id = l.recipeId
+                        where r.userId NOT IN(1)
+                        group by r.id
+                        order by  {order} ,r.percent desc
+                        limit {limit} offset {offset};'''
+            elif percent == "1":
+                query = f'''select r.id, r.title, r.percent , count(l.userId) as cnt
+                        from recipe r
+                        left join likeRecipe l
+                        on r.id = l.recipeId
+                        where r.userId NOT IN(1) and percent = 1
+                        group by r.id
+                        order by  {order} , r.percent desc
+                        limit {limit} offset {offset};'''
+                
+            elif percent == "2":
+                query = f'''select r.id, r.title, r.percent , count(l.userId) as cnt
+                        from recipe r
+                        left join likeRecipe l
+                        on r.id = l.recipeId
+                        where r.userId NOT IN(1) and percent = 2
+                        group by r.id
+                        order by  {order} , r.percent desc
+                        limit {limit} offset {offset};'''
+
+            elif percent == "3":
+                query = f'''select r.id, r.title, r.percent , count(l.userId) as cnt
+                        from recipe r
+                        left join likeRecipe l
+                        on r.id = l.recipeId
+                        where r.userId NOT IN(1) and percent = 3
+                        group by r.id
+                        order by  {order} ,r.percent desc
+                        limit {limit} offset {offset};'''   
+
+            elif percent == "4":
+                query = f'''select r.id, r.title, r.percent , count(l.userId) as cnt
+                        from recipe r
+                        left join likeRecipe l
+                        on r.id = l.recipeId
+                        where r.userId NOT IN(1) and percent = 4
+                        group by r.id
+                        order by  {order} , r.percent desc
+                        limit {limit} offset {offset};''' 
 
         
             cursor = connection.cursor(dictionary= True)
@@ -457,21 +510,74 @@ class RecipeAllListResource(Resource):
     def get(self) :
       
 
+
+
+        # user_id = get_jwt_identity()
+        percent = request.args.get('percent')
         order = request.args.get('order')
         offset = request.args.get('offset')
         limit = request.args.get('limit')
-        
 
         try :
             connection = get_connection()
 
-            query = '''select r.title, r.percent , count(l.userId) as cnt
-                    from recipe r
-                    left join likeRecipe l
-                    on r.id = l.recipeId
-                    group by r.id
-                    order by ''' + order + '''  desc
-                    limit ''' + offset + ''', '''+ limit + ''';'''
+            if order == "cnt":
+                order = "cnt desc"
+
+            elif order == "createdAt":
+                order = "r.createdAt desc"
+
+            elif order == "title":
+                order = "r.title asc"            
+
+            if percent == "0":
+
+                query = f'''select r.id, r.title, r.percent , count(l.userId) as cnt
+                        from recipe r
+                        left join likeRecipe l
+                        on r.id = l.recipeId
+                        group by r.id
+                        order by  {order} ,r.percent desc
+                        limit {limit} offset {offset};'''
+            elif percent == "1":
+                query = f'''select r.id, r.title, r.percent , count(l.userId) as cnt
+                        from recipe r
+                        left join likeRecipe l
+                        on r.id = l.recipeId
+                        where  percent = 1
+                        group by r.id
+                        order by  {order} , r.percent desc
+                        limit {limit} offset {offset};'''
+                
+            elif percent == "2":
+                query = f'''select r.id, r.title, r.percent , count(l.userId) as cnt
+                        from recipe r
+                        left join likeRecipe l
+                        on r.id = l.recipeId
+                        where percent = 2
+                        group by r.id
+                        order by  {order} , r.percent desc
+                        limit {limit} offset {offset};'''
+
+            elif percent == "3":
+                query = f'''select r.id, r.title, r.percent , count(l.userId) as cnt
+                        from recipe r
+                        left join likeRecipe l
+                        on r.id = l.recipeId
+                        where percent = 3
+                        group by r.id
+                        order by  {order} ,r.percent desc
+                        limit {limit} offset {offset};'''   
+
+            elif percent == "4":
+                query = f'''select r.id, r.title, r.percent , count(l.userId) as cnt
+                        from recipe r
+                        left join likeRecipe l
+                        on r.id = l.recipeId
+                        where percent = 4
+                        group by r.id
+                        order by  {order} , r.percent desc
+                        limit {limit} offset {offset};''' 
 
         
             cursor = connection.cursor(dictionary= True)
