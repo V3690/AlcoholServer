@@ -316,7 +316,7 @@ class RecipeMasterallListResource(Resource):
                 order = "cnt desc"
 
             elif order == "createdAt":
-                order = "a.createdAt desc"
+                order = "r.createdAt desc"
 
             elif order == "title":
                 order = "r.title asc"            
