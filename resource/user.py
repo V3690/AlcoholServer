@@ -81,11 +81,11 @@ class UserRegisterResource(Resource):
             connection = get_connection()
 
             query = """
-                INSERT INTO users ( email, password, nickname,accountTyp) 
+                INSERT INTO users ( email, password, nickname,accountType) 
                 VALUES (%s, %s, %s,%s);
                 """
             
-            record = (data['email'],hashed_password, data['nickname'] )
+            record = (data['email'],hashed_password, data['nickname'],data['accountType'] )
             
             cursor = connection.cursor() # 커서를 가져온다.
             cursor.execute(query, record) # 쿼리를 실행한다.
@@ -128,9 +128,9 @@ class UserLoginResource(Resource):
             query = """
                 select * 
                 from users
-                where email = %s;
+                where email = %s and accountType = %s;
             """
-            record = (data['email'],) 
+            record = (data['email'],data['accountType'])
             
             cursor = connection.cursor(dictionary=True) # dictionary=True를 하면, DB의 컬럼명을 key로 가지는 딕셔너리를 리턴한다.
             cursor.execute(query, record)
