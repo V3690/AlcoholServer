@@ -79,16 +79,17 @@ class UserRegisterResource(Resource):
                 #     "email": "master@naver.com",
                 #     "password": "12341234",
                 #     "nickname": "마스터"
+                #      "accountType" : "recipeApp"
                 # }
         try:
             connection = get_connection()
 
             query = """
-                INSERT INTO users ( email, password, nickname) 
-                VALUES (%s, %s, %s);
+                INSERT INTO users ( email, password, nickname,accountType) 
+                VALUES (%s, %s, %s,%s);
                 """
             
-            record = (data['email'],hashed_password, data['nickname'] )
+            record = (data['email'],hashed_password, data['nickname'],data['accountType'] )
             
             cursor = connection.cursor() # 커서를 가져온다.
             cursor.execute(query, record) # 쿼리를 실행한다.
@@ -131,9 +132,9 @@ class UserLoginResource(Resource):
             query = """
                 select * 
                 from users
-                where email = %s;
+                where email = %s and accountType = %s;
             """
-            record = (data['email'],) 
+            record = (data['email'],data['accountType']) 
             
             cursor = connection.cursor(dictionary=True) # dictionary=True를 하면, DB의 컬럼명을 key로 가지는 딕셔너리를 리턴한다.
             cursor.execute(query, record)
@@ -247,7 +248,6 @@ class UserResource(Resource) :
 
 
 
-
 # 닉네임 변경
 class UserNicknameResetResource(Resource):
     @jwt_required()
@@ -266,7 +266,7 @@ class UserNicknameResetResource(Resource):
                 record = cursor.fetchone()
                 cursor.close()
                 connection.close()
-
+                
                 if record:
                     return {'error': '이미 존재하는 닉네임입니다.'}, 400
             except Error as e:
@@ -274,7 +274,7 @@ class UserNicknameResetResource(Resource):
                 cursor.close()
                 connection.close()
                 return {'error': str(e) }, 500 # 500은 서버에러를 리턴하는 에러코드
-
+            
             try :
                 connection = get_connection()
 
@@ -298,54 +298,6 @@ class UserNicknameResetResource(Resource):
                 return {'error' : str(e)}, 500
 
             return {'result' : 'success',}, 200
-
-
-
-class UserNicknameResource(Resource):
-    @jwt_required()
-    def get(self) :
-        user_id = get_jwt_identity()
-        try :
-
-            connection = get_connection()
-
-            query = '''select id, nickname
-                    from users
-                    where id = %s;'''
-                                
-
-                                
-            record = (user_id, )
-            cursor = connection.cursor(dictionary= True)
-            cursor.execute(query, record)
-
-            result_list = cursor.fetchall()
-
-            if result_list[0]['id'] is None :
-                return{'error' : '잘못된 알콜 아이디 입니다.'}, 400
-
-            # i = 0
-            # for row in result_list :
-            #     result_list[i]['createdAt'] = row['createdAt'].isoformat()
-            #     result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
-            #     i = i + 1
-
-            cursor.close()
-            connection.close()
-
-
-        except Error as e :
-            print(e)            
-            cursor.close()
-            connection.close()
-            return {"error" : str(e)}, 500
-                
-        
-        return { "result" : "success" ,
-                "alcohol" : result_list[0] }, 200
-    
-
-
 
 # 비밀번호 변경
 class UserPasswordResetResource(Resource) :
