@@ -68,10 +68,6 @@ class UserRegisterResource(Resource):
             validate_email(data['email']) 
         except EmailNotValidError as e:
             return {'error': str(e)}, 400 
-
-        # 비밀번호 유효성 검사
-        if len(data['password']) < 4 or len(data['password']) > 12: 
-            return {'error': '비밀번호는 4자리 이상, 12자리 이하로 입력해주세요.'}, 400 
         
         hashed_password = hash_password( data['password'] ) 
 
@@ -79,7 +75,7 @@ class UserRegisterResource(Resource):
                 #     "email": "master@naver.com",
                 #     "password": "12341234",
                 #     "nickname": "마스터"
-                #      "accountType" : "recipeApp"
+                #      "account"
                 # }
         try:
             connection = get_connection()
@@ -134,7 +130,7 @@ class UserLoginResource(Resource):
                 from users
                 where email = %s and accountType = %s;
             """
-            record = (data['email'],data['accountType']) 
+            record = (data['email'],data['accountType'])
             
             cursor = connection.cursor(dictionary=True) # dictionary=True를 하면, DB의 컬럼명을 key로 가지는 딕셔너리를 리턴한다.
             cursor.execute(query, record)
