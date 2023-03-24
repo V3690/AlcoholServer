@@ -68,10 +68,6 @@ class UserRegisterResource(Resource):
             validate_email(data['email']) 
         except EmailNotValidError as e:
             return {'error': str(e)}, 400 
-
-        # 비밀번호 유효성 검사
-        if len(data['password']) < 4 or len(data['password']) > 12: 
-            return {'error': '비밀번호는 4자리 이상, 12자리 이하로 입력해주세요.'}, 400 
         
         hashed_password = hash_password( data['password'] ) 
 
