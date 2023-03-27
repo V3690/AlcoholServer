@@ -154,7 +154,7 @@ class UserLoginResource(Resource):
             connection.close()
             return {'error' : str(e)}, 500 # 500은 서버에러를 리턴하는 에러코드
 
-        if 'password' in data:
+        if 'password' in data :
              # 3. 비밀번호를 비교한다.
             check = check_password(data['password'], result_list[0]['password']) 
 
@@ -166,11 +166,13 @@ class UserLoginResource(Resource):
 
             return {'nickname' : result_list[0]['nickname'],'access_token': acces_token}, 200 # 200은 성공했다는 의미의 코드
 
-        else:
-            if result_list[0]['accountType'] == 1 :
+        else :
+            if data['accountType'] == 1 :
                 acces_token = create_access_token(identity=result_list[0]['id'] ) # identity는 토큰에 담길 내용이다. # 담을게 여러개면 딕셔너리 형태로담는다.
                 return {'nickname' : result_list[0]['nickname'],'access_token': acces_token}, 200 # 200은 성공했다는 의미의 코드
-           
+            
+            return {'error': 'password를 입력해주세요.'}, 400
+            
 
 ## 로그아웃된 토큰을 저장할 set 만든다.
 jwt_blocklist = set() # set은 중복을 허용하지 않는다.
