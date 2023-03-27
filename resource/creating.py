@@ -488,9 +488,8 @@ class CreatingRecipeEdit(Resource):
         # photo(file), content(text)
         
         # 유저 토큰으로부터 user_id 반환
-        
-
-        if 'img' not in request.files:
+        # 파일이 없으면,
+        if  request.files['img'].filename == '':
             # 쿼리 부분을 만든다.
             title = request.form['title']
             engTitle = request.form['engTitle']
