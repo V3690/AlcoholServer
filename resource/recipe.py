@@ -776,25 +776,18 @@ class RecipeResource(Resource):
         try :
             connection = get_connection()
 
-            query = '''select r.title, count(l.userId) as likeCnt , r.percent ,a.alcoholType, u.nickname , r.engTitle,r.intro, r.content,r.imgUrl, GROUP_CONCAT(DISTINCT ig.name SEPARATOR ', ')as ingredient ,r.createdAt ,r.updatedAt, r.userId, if(lr.userId is null, 0 , 1) as isLike
-                    from recipe r
-                    left join likeRecipe l
-                    on r.id = l.recipeId
-                    left join recipeAlcohol ra
-                    on r.id = ra.recipeId
-                    left join alcohol a
-                    on ra.AlcoholId = a.id
-                    left join recipeIngredient ri
-                    on ri.recipeId = r.id
-                    left join ingredient ig
-                    on ig.id = ri.ingredientId
-                    left join users u
-                    on u.id = r.userId
-                    left join likeRecipe lr
-                    on lr.recipeId = r.id and lr.userId = %s
-                    where r.id = %s
-                    group by l.recipeId 
-                    order by count(l.userId) desc;'''
+            query = '''SELECT r.title, COUNT(DISTINCT l.userId) AS likeCnt, r.percent, a.alcoholType, u.nickname, r.engTitle, r.intro, r.content, r.imgUrl, GROUP_CONCAT(DISTINCT ig.name SEPARATOR ', ') AS ingredient, r.createdAt, r.updatedAt, r.userId, IF(lr.userId IS NULL, 0, 1) AS isLike
+                    FROM recipe r
+                    LEFT JOIN likeRecipe l ON r.id = l.recipeId
+                    LEFT JOIN recipeAlcohol ra ON r.id = ra.recipeId
+                    LEFT JOIN alcohol a ON ra.AlcoholId = a.id
+                    LEFT JOIN recipeIngredient ri ON ri.recipeId = r.id
+                    LEFT JOIN ingredient ig ON ig.id = ri.ingredientId
+                    LEFT JOIN users u ON u.id = r.userId
+                    LEFT JOIN likeRecipe lr ON lr.recipeId = r.id AND lr.userId = %s
+                    WHERE r.id = %s
+                    GROUP BY l.recipeId 
+                    ORDER BY likeCnt DESC;;'''
 
             record = (user_id, recipe_id )
             cursor = connection.cursor(dictionary= True)
