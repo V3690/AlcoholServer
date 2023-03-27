@@ -5,6 +5,7 @@ from config import Config
 
 # 원문 비밀번호를, 단방향 암호화 하는 함수
 def hash_password(original_password): 
+    # 카카오 회원을 위한 none값 
     if original_password is None:
         return None
 
@@ -15,6 +16,10 @@ def hash_password(original_password):
 
 # 유저가 로그인 할때, 입력한 비밀번호와, DB에 저장된 비밀번호를 비교하는 함수
 def check_password(original_password, hashed_password): # 원문 비밀번호, 암호화된 비밀번호
+   # 위와 마찬가지로 카카오 회원을 위한 none값
+   if original_password is None:
+    return None
+
     # 위에서 사용한 salt 와 똑같은 문자열
     password = original_password + Config.SALT
     check = pbkdf2_sha256.verify(password, hashed_password)
