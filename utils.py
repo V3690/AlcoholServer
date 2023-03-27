@@ -5,6 +5,9 @@ from config import Config
 
 # 원문 비밀번호를, 단방향 암호화 하는 함수
 def hash_password(original_password): 
+    if original_password is None:
+        return None
+
      # salt는 랜덤한 문자열 # 해킹이 어렵도록 ## 반드시 config에 분리저장
     password = original_password + Config.SALT # 원문 비밀번호에 salt를 붙여서 암호화
     password = pbkdf2_sha256.hash(password) # 암호화된 비밀번호를 리턴

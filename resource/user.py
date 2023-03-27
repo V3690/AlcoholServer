@@ -69,7 +69,7 @@ class UserRegisterResource(Resource):
         except EmailNotValidError as e:
             return {'error': str(e)}, 400 
         
-        hashed_password = hash_password( data['password'] ) 
+       
 
                 # {
                 #     "email": "master@naver.com",
@@ -84,8 +84,13 @@ class UserRegisterResource(Resource):
                 INSERT INTO users ( email, password, nickname,accountType) 
                 VALUES (%s, %s, %s,%s);
                 """
-            
-            record = (data['email'],hashed_password, data['nickname'],data['accountType'] )
+            if 'password' in data:
+                hashed_password = hash_password( data['password'] ) 
+                              
+                record = (data['email'], hashed_password, data['nickname'], data['accountType'])
+            else:
+                record = (data['email'], None, data['nickname'], data['accountType'])
+
             
             cursor = connection.cursor() # 커서를 가져온다.
             cursor.execute(query, record) # 쿼리를 실행한다.
