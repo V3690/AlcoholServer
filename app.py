@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from config import Config
-from resource.alcohol import AlcoholSearchKeyword, AlcoholAddResource, AlcoholDeleteResource, AlcoholListResource, AlcoholRequestResource, AlcoholResource, AlcoholUpdateResource
+from resource.alcohol import AlcholLikeListResource, AlcholLikeListSearchResource, AlcoholSearchKeyword, AlcoholAddResource, AlcoholDeleteResource, AlcoholListResource, AlcoholRequestResource, AlcoholResource, AlcoholUpdateResource
 from resource.creating import CreatingAlcoholList, CreatingIngredientList, CreatingRecipe, CreatingRecipeEdit, CreatingRecipeEditMaster, CreatingRecipeIngredient, CreatingRecipeIngredientEdit, CreatingSearchAlcohol, CreatingSearchIngredient, RecipeSelectedAlcoholResource, RecipeSelectedIngredientResource, RecipeTotalIngredientResource
 from resource.game import CheersResource, DiceResource, RekognitionEmotionResource
 from resource.like  import LikeAlcoholResource, LikeRecipeResource
@@ -41,6 +41,10 @@ api.add_resource(RecipeHonorListResource, '/recipe/honor')
 # 즐겨찾기 (필터링, 검색)
 api.add_resource(RecipeLikeListResource, '/recipe/favorite')
 api.add_resource(RecipeLikeSearchResource, '/recipe/favorite/search')
+api.add_resource(AlcholLikeListResource,'/alcohol/favorite')
+api.add_resource(AlcholLikeListSearchResource,'/alcohol/favorite/search')
+
+
 
 # 닉네임변경, 비밀번호변경, 탈퇴
 api.add_resource(UserNicknameResetResource,'/user/edit/nickname')
