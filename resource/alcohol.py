@@ -515,10 +515,181 @@ class AlcoholDeleteResource(Resource):
         return {'result' : 'success'}, 200
     
 
+#도감 즐겨찾기
+# 즐겨찾기 레시피 리스트 (필터링)
+class AlcholLikeListResource(Resource):
+    
+    @jwt_required()
+    def get(self) :
+        
+        percent = request.args.get('percent')
+        order = request.args.get('order')
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+        userId = get_jwt_identity()
 
 
+        try :
+            connection = get_connection()
 
 
+            if order == "cnt":
+                order = "cnt desc"
+
+            elif order == "createdAt":
+                order = "a.createdAt desc"
+
+            elif order == "name":
+                order = "a.name asc"
+
+            # 0: 전체 1 : 약, 2: 중, 3:강 
+            # cnt : 인기순 , createdAt :최신순, name: 한글순
+
+            # 전체 선택시
+            if percent == "0":
+
+                query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce, a.supply, count(l1.alcoholId) as cnt
+                        from alcohol a
+                         left join likeAlcohol l1
+                        on a.id = l1.alcoholId
+                         left join likeAlcohol l2
+                          on a.id = l2.alcoholId
+                        where l2.userId = ''' + str(userId) + '''
+                        group by a.id
+                        order by ''' + order + ''' , a.percent desc
+                        limit ''' + offset + ''', '''+ limit + ''';'''
+                
+            # 도수가 약일 때
+            elif percent == "1":
+
+                query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce, a.supply, count(l1.alcoholId) as cnt
+                        from alcohol a
+                         left join likeAlcohol l1
+                        on a.id = l1.alcoholId
+                         left join likeAlcohol l2
+                          on a.id = l2.alcoholId
+                        where l2.userId = ''' + str(userId) + '''and percent <= 10
+                        group by a.id
+                        order by ''' + order + ''' , a.percent desc
+                        limit ''' + offset + ''', '''+ limit + ''';'''
+                
+            # 도수가 중일 때
+            elif percent == "2":
+                query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce, a.supply, count(l1.alcoholId) as cnt
+                        from alcohol a
+                         left join likeAlcohol l1
+                        on a.id = l1.alcoholId
+                         left join likeAlcohol l2
+                          on a.id = l2.alcoholId
+                        where l2.userId = ''' + str(userId) + '''and percent>=11 and percent<=20
+                            group by a.id
+                            order by ''' + order + ''' , a.percent desc
+                            limit ''' + offset + ''', '''+ limit + ''';'''
+                
+
+            # 도수가 강일 때
+            elif percent == "3":
+                query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce, a.supply, count(l1.alcoholId) as cnt
+                        from alcohol a
+                         left join likeAlcohol l1
+                        on a.id = l1.alcoholId
+                         left join likeAlcohol l2
+                          on a.id = l2.alcoholId
+                        where l2.userId = ''' + str(userId) + '''and a.percent>=21
+                            group by a.id
+                            order by ''' + order + ''' , a.percent desc
+                            limit ''' + offset + ''', '''+ limit + ''';'''
 
 
+            # 도수가 ? 일 때 => null 값인 데이터
+            elif  percent == "4":
+                query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce, a.supply, count(l1.alcoholId) as cnt
+                        from alcohol a
+                         left join likeAlcohol l1
+                        on a.id = l1.alcoholId
+                         left join likeAlcohol l2
+                          on a.id = l2.alcoholId
+                        where l2.userId = ''' + str(userId) + '''and a.percent = null
+                            group by a.id
+                            order by ''' + order + ''' , a.percent desc
+                            limit ''' + offset + ''', '''+ limit + ''';'''
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(query, )
+
+
+            result_list = cursor.fetchall()
+
+            # i = 0
+            # for row in result_list :
+            #     result_list[i]['avg'] = float(row['avg'])
+            #     i = i + 1
+
+            cursor.close()
+            connection.close()
+
+
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+
+        return {"result" : "success" ,
+                "items" : result_list , 
+                "count" : len(result_list)}, 200
+
+
+# 내가 좋아요한 알콜중 키워드로 찾기
+class AlcholLikeListSearchResource(Resource):
+    @jwt_required()
+    def get(self) :
+        
+
+        keyword = request.args.get('keyword')
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+        userId = get_jwt_identity()
+
+        try :
+            connection = get_connection()
+
+            query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce, a.supply, count(l1.alcoholId) as cnt
+                        from alcohol a
+                         left join likeAlcohol l1
+                        on a.id = l1.alcoholId
+                         left join likeAlcohol l2
+                          on a.id = l2.alcoholId
+                        where a.name like "%''' + keyword + '''%" and l2.userId ='''+str(userId)+'''
+                    group by a.id
+                    limit ''' + offset + ''', '''+ limit + ''';'''
+
+
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(query, )
+
+
+            result_list = cursor.fetchall()
+
+            # i = 0
+            # for row in result_list :
+            #     result_list[i]['avg'] = float(row['avg'])
+            #     i = i + 1
+
+            cursor.close()
+            connection.close()
+
+
+        except Error as e :
+            print(e)            
+            cursor.close()
+            connection.close()
+            return {"error" : str(e)}, 500
+                
+        # print(result_list)
+
+        return {"result" : "success" ,
+                "items" : result_list , 
+                "count" : len(result_list)}, 200
 
