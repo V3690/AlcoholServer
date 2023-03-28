@@ -839,7 +839,7 @@ class RecipeListKeywordResource(Resource):
         try :
             connection = get_connection()
 
-            query = '''select userId,id as recipeId ,title, percent , createdAt ,updatedAt
+            query = '''select userId,id ,title, percent , createdAt ,updatedAt
                     from recipe
                     where title like "%''' +keyword+ '''%"
                     order by updatedAt desc;
