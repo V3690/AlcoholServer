@@ -568,7 +568,7 @@ class AlcholLikeListResource(Resource):
                         on a.id = l1.alcoholId
                          left join likeAlcohol l2
                           on a.id = l2.alcoholId
-                        where l2.userId = ''' + str(userId) + '''and percent <= 10
+                        where percent <= 10 and l2.userId = ''' + str(userId) + '''
                         group by a.id
                         order by ''' + order + ''' , a.percent desc
                         limit ''' + offset + ''', '''+ limit + ''';'''
@@ -581,7 +581,7 @@ class AlcholLikeListResource(Resource):
                         on a.id = l1.alcoholId
                          left join likeAlcohol l2
                           on a.id = l2.alcoholId
-                        where l2.userId = ''' + str(userId) + '''and percent>=11 and percent<=20
+                        where  percent>=11 and percent<=20 and l2.userId = ''' + str(userId) + '''
                             group by a.id
                             order by ''' + order + ''' , a.percent desc
                             limit ''' + offset + ''', '''+ limit + ''';'''
@@ -595,7 +595,7 @@ class AlcholLikeListResource(Resource):
                         on a.id = l1.alcoholId
                          left join likeAlcohol l2
                           on a.id = l2.alcoholId
-                        where l2.userId = ''' + str(userId) + '''and a.percent>=21
+                        where a.percent>=21 and l2.userId = ''' + str(userId) + '''
                             group by a.id
                             order by ''' + order + ''' , a.percent desc
                             limit ''' + offset + ''', '''+ limit + ''';'''
@@ -609,7 +609,7 @@ class AlcholLikeListResource(Resource):
                         on a.id = l1.alcoholId
                          left join likeAlcohol l2
                           on a.id = l2.alcoholId
-                        where l2.userId = ''' + str(userId) + '''and a.percent = null
+                        where a.percent = null and l2.userId = ''' + str(userId) + '''
                             group by a.id
                             order by ''' + order + ''' , a.percent desc
                             limit ''' + offset + ''', '''+ limit + ''';'''
