@@ -548,7 +548,7 @@ class AlcholLikeListResource(Resource):
             # 전체 선택시
             if percent == "0":
 
-                query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce, a.supply, count(l1.alcoholId) as cnt
+                query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce,a.imgUrl, a.supply, count(l1.alcoholId) as cnt
                         from alcohol a
                          left join likeAlcohol l1
                         on a.id = l1.alcoholId
@@ -562,7 +562,7 @@ class AlcholLikeListResource(Resource):
             # 도수가 약일 때
             elif percent == "1":
 
-                query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce, a.supply, count(l1.alcoholId) as cnt
+                query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce,a.imgUrl, a.supply, count(l1.alcoholId) as cnt
                         from alcohol a
                          left join likeAlcohol l1
                         on a.id = l1.alcoholId
@@ -575,7 +575,7 @@ class AlcholLikeListResource(Resource):
                 
             # 도수가 중일 때
             elif percent == "2":
-                query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce, a.supply, count(l1.alcoholId) as cnt
+                query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce,a.imgUrl, a.supply, count(l1.alcoholId) as cnt
                         from alcohol a
                          left join likeAlcohol l1
                         on a.id = l1.alcoholId
@@ -589,7 +589,7 @@ class AlcholLikeListResource(Resource):
 
             # 도수가 강일 때
             elif percent == "3":
-                query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce, a.supply, count(l1.alcoholId) as cnt
+                query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce,a.imgUrl, a.supply, count(l1.alcoholId) as cnt
                         from alcohol a
                          left join likeAlcohol l1
                         on a.id = l1.alcoholId
@@ -603,7 +603,7 @@ class AlcholLikeListResource(Resource):
 
             # 도수가 ? 일 때 => null 값인 데이터
             elif  percent == "4":
-                query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce, a.supply, count(l1.alcoholId) as cnt
+                query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce,a.imgUrl, a.supply, count(l1.alcoholId) as cnt
                         from alcohol a
                          left join likeAlcohol l1
                         on a.id = l1.alcoholId
