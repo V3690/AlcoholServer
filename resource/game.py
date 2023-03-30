@@ -12,6 +12,7 @@ from config import Config
 import random
 import pandas as pd
 import openai
+import os
 
 
 ## 오락실 페이지 ##

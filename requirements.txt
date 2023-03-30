@@ -4,4 +4,4 @@ markupsafe==2.0.1
 flask-restful
 flask-jwt-extended
 openai
-cchardet
+os
