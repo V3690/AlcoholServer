@@ -19,4 +19,5 @@ class Config:
     # S3 Location
     S3_LOCATION = 'http://{}.s3.ap-northeast-2.amazonaws.com/'.format(BUCKET_NAME)
 
-    
+    # openai 시크릿키
+    OPENAI_SECRET_KEY = "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"
