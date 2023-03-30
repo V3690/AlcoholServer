@@ -843,6 +843,8 @@ class RecipeListKeywordResource(Resource):
                 type = "=1"
             elif type == "1":
                 type = " not in (1)"
+            elif type == "2":
+                type = " >0"
            
             query = '''select userId,id ,title, percent , createdAt ,updatedAt
                     from recipe
