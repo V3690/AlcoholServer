@@ -827,15 +827,20 @@ class RecipeListKeywordResource(Resource):
         keyword = request.args.get('keyword')
         offset = request.args.get('offset')
         limit = request.args.get('limit')
-        
+        type = request.args.get('type')
 
         try :
             connection = get_connection()
 
+            if type == "0":
+                type = "=1"
+            elif type == "1":
+                type = " not in (1)"
+           
             query = '''select userId,id ,title, percent , createdAt ,updatedAt
                     from recipe
-                    where title like "%''' +keyword+ '''%"
-                    order by updatedAt desc;
+                    where title like "%''' +keyword+ '''%" and userId'''+type+'''
+                    order by updatedAt desc
                     limit ''' + offset + ''', '''+ limit + ''';'''
 
 
