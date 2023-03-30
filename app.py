@@ -4,7 +4,7 @@ from flask_jwt_extended import JWTManager
 from config import Config
 from resource.alcohol import AlcholLikeListResource, AlcholLikeListSearchResource, AlcoholSearchKeyword, AlcoholAddResource, AlcoholDeleteResource, AlcoholListResource, AlcoholRequestResource, AlcoholResource, AlcoholUpdateResource
 from resource.creating import CreatingAlcoholList, CreatingIngredientList, CreatingRecipe, CreatingRecipeEdit, CreatingRecipeEditMaster, CreatingRecipeIngredient, CreatingRecipeIngredientEdit, CreatingSearchAlcohol, CreatingSearchIngredient, RecipeSelectedAlcoholResource, RecipeSelectedIngredientResource, RecipeTotalIngredientResource
-from resource.game import CheersResource, DiceResource, RekognitionEmotionResource, GPT3CHATBOTRESOURCE
+from resource.game import CheersResource, DiceResource, RekognitionEmotionResource
 from resource.like  import LikeAlcoholResource, LikeRecipeResource
 from resource.recipe import RecipeListKeywordResource, RecipeMyListKeywordResource, RecipeMyListAllResource ,RecipeAllListResource, RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource, RecipeMasterallListResource, RecipeMyListPercentResource, RecipeResource, RecipeUserListResource
 from resource.test import GitActionTestResource
@@ -122,7 +122,7 @@ api.add_resource(AlcoholDeleteResource, '/alcohol/delete/<int:alcohol_id>')
 api.add_resource(RekognitionEmotionResource, '/game/emotion')
 api.add_resource(DiceResource, '/game/dice/<int:subjectType_id>/<int:penaltyType_id>')
 api.add_resource(CheersResource, '/game/cheers')
-api.add_resource(GPT3CHATBOTRESOURCE, '/game/chatbot')
+# api.add_resource(GPT3CHATBOTRESOURCE, '/game/chatbot')
 
 # 깃 액션 테스트용
 api.add_resource(GitActionTestResource, '/test')
