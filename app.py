@@ -129,7 +129,7 @@ api.add_resource(GitActionTestResource, '/test')
 
 
 if __name__ == '__main__': 
-    app.debug = True
+    app.debug = False
     app.run() # debug=True 는 개발할때만 사용해야함 # 배포할때는 False로 바꿔야함 
     # debug=True 는 코드를 수정하면, 서버를 재시작하지 않아도, 자동으로 코드가 반영됨
     # 디버그 모드를 사용하려면 set FLASK_ENV=development 를 cmd에 입력해야함
