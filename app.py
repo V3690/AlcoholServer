@@ -124,7 +124,7 @@ api.add_resource(DiceResource, '/game/dice/<int:subjectType_id>/<int:penaltyType
 api.add_resource(CheersResource, '/game/cheers')
 # api.add_resource(GPT3CHATBOTRESOURCE, '/game/chatbot')
 
-# 깃 액션 테스트용2
+# 깃 액션 테스트용3
 api.add_resource(GitActionTestResource, '/test')
 
 
