@@ -1,4 +1,4 @@
-service: aws-alcohol-serverless-api
+service: aws-alcohol-serverless-api3
 
 frameworkVersion: '3'
 

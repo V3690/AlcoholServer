@@ -1,8 +1,8 @@
 {
   "service": {
-    "service": "aws-alcohol-serverless-api",
+    "service": "aws-alcohol-serverless-api3",
     "serviceObject": {
-      "name": "aws-alcohol-serverless-api"
+      "name": "aws-alcohol-serverless-api3"
     },
     "provider": {
       "name": "aws",
@@ -87,7 +87,7 @@
           "ApiLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/aws-alcohol-serverless-api-dev-api"
+              "LogGroupName": "/aws/lambda/aws-alcohol-serverless-api3-dev-api"
             }
           },
           "IamRoleLambdaExecution": {
@@ -115,7 +115,7 @@
                     "Fn::Join": [
                       "-",
                       [
-                        "aws-alcohol-serverless-api",
+                        "aws-alcohol-serverless-api3",
                         "dev",
                         "lambda"
                       ]
@@ -133,7 +133,7 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/aws-alcohol-serverless-api-dev*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/aws-alcohol-serverless-api3-dev*:*"
                           }
                         ]
                       },
@@ -144,7 +144,7 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/aws-alcohol-serverless-api-dev*:*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/aws-alcohol-serverless-api3-dev*:*:*"
                           }
                         ]
                       }
@@ -157,7 +157,7 @@
                 "Fn::Join": [
                   "-",
                   [
-                    "aws-alcohol-serverless-api",
+                    "aws-alcohol-serverless-api3",
                     "dev",
                     {
                       "Ref": "AWS::Region"
@@ -175,11 +175,11 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/aws-alcohol-serverless-api/dev/1678932317845-2023-03-16T02:05:17.845Z/aws-alcohol-serverless-api.zip"
+                "S3Key": "serverless/aws-alcohol-serverless-api3/dev/1680248116732-2023-03-31T07:35:16.732Z/aws-alcohol-serverless-api3.zip"
               },
               "Handler": "wsgi_handler.handler",
               "Runtime": "python3.9",
-              "FunctionName": "aws-alcohol-serverless-api-dev-api",
+              "FunctionName": "aws-alcohol-serverless-api3-dev-api",
               "MemorySize": 1024,
               "Timeout": 16,
               "Role": {
@@ -193,20 +193,20 @@
               "ApiLogGroup"
             ]
           },
-          "ApiLambdaVersionSHw2mqpEpfPuXPRh5VnCpZ3j0oN77lOEm0RFIMerk": {
+          "ApiLambdaVersionKPaHreJRR2Baoyyh80XvbLkp85j8OdGCZRDkhZ3z00": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "ApiLambdaFunction"
               },
-              "CodeSha256": "0TnC7LTHlc93n9xJgN/pcjDnXEAvfvcn3XeqNABnf1Q="
+              "CodeSha256": "gQUxWDs5SuEd91ZmKYM6qbxHCDYeW+dMm3wH+LIX+I0="
             }
           },
           "HttpApi": {
             "Type": "AWS::ApiGatewayV2::Api",
             "Properties": {
-              "Name": "dev-aws-alcohol-serverless-api",
+              "Name": "dev-aws-alcohol-serverless-api3",
               "ProtocolType": "HTTP"
             }
           },
@@ -302,16 +302,16 @@
               "Ref": "ServerlessDeploymentBucket"
             },
             "Export": {
-              "Name": "sls-aws-alcohol-serverless-api-dev-ServerlessDeploymentBucketName"
+              "Name": "sls-aws-alcohol-serverless-api3-dev-ServerlessDeploymentBucketName"
             }
           },
           "ApiLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ApiLambdaVersionSHw2mqpEpfPuXPRh5VnCpZ3j0oN77lOEm0RFIMerk"
+              "Ref": "ApiLambdaVersionKPaHreJRR2Baoyyh80XvbLkp85j8OdGCZRDkhZ3z00"
             },
             "Export": {
-              "Name": "sls-aws-alcohol-serverless-api-dev-ApiLambdaFunctionQualifiedArn"
+              "Name": "sls-aws-alcohol-serverless-api3-dev-ApiLambdaFunctionQualifiedArn"
             }
           },
           "HttpApiId": {
@@ -320,7 +320,7 @@
               "Ref": "HttpApi"
             },
             "Export": {
-              "Name": "sls-aws-alcohol-serverless-api-dev-HttpApiId"
+              "Name": "sls-aws-alcohol-serverless-api3-dev-HttpApiId"
             }
           },
           "HttpApiUrl": {
@@ -345,7 +345,7 @@
               ]
             },
             "Export": {
-              "Name": "sls-aws-alcohol-serverless-api-dev-HttpApiUrl"
+              "Name": "sls-aws-alcohol-serverless-api3-dev-HttpApiUrl"
             }
           }
         }
@@ -453,19 +453,19 @@
             "resolvedMethod": "ANY"
           }
         ],
-        "name": "aws-alcohol-serverless-api-dev-api",
+        "name": "aws-alcohol-serverless-api3-dev-api",
         "package": {},
         "memory": 1024,
         "timeout": 16,
         "runtime": "python3.9",
         "vpc": {},
-        "versionLogicalId": "ApiLambdaVersionSHw2mqpEpfPuXPRh5VnCpZ3j0oN77lOEm0RFIMerk"
+        "versionLogicalId": "ApiLambdaVersionKPaHreJRR2Baoyyh80XvbLkp85j8OdGCZRDkhZ3z00"
       }
     },
     "configValidationMode": "warn",
     "serviceFilename": "serverless.yml",
     "initialServerlessConfig": {
-      "service": "aws-alcohol-serverless-api",
+      "service": "aws-alcohol-serverless-api3",
       "frameworkVersion": "3",
       "custom": {
         "$ref": "$[\"service\"][\"custom\"]"
@@ -482,10 +482,10 @@
     },
     "layers": {},
     "isDashboardMonitoringPreconfigured": false,
-    "artifact": "C:\\Users\\5-10\\Documents\\Github\\AlcoholServer\\.serverless\\aws-alcohol-serverless-api.zip"
+    "artifact": "C:\\Users\\5-10\\Documents\\Github\\AlcoholServer\\.serverless\\aws-alcohol-serverless-api3.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/aws-alcohol-serverless-api/dev/1678932317845-2023-03-16T02:05:17.845Z",
-    "artifact": "aws-alcohol-serverless-api.zip"
+    "artifactDirectoryName": "serverless/aws-alcohol-serverless-api3/dev/1680248116732-2023-03-31T07:35:16.732Z",
+    "artifact": "aws-alcohol-serverless-api3.zip"
   }
 }
