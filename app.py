@@ -7,7 +7,6 @@ from resource.creating import CreatingAlcoholList, CreatingIngredientList, Creat
 from resource.game import CheersResource, DiceResource, RekognitionEmotionResource
 from resource.like  import LikeAlcoholResource, LikeRecipeResource
 from resource.recipe import RecipeListKeywordResource, RecipeMyListKeywordResource, RecipeMyListAllResource ,RecipeAllListResource, RecipeHonorListResource, RecipeLikeListResource, RecipeLikeSearchResource, RecipeMasterListResource, RecipeMasterallListResource, RecipeMyListPercentResource, RecipeResource, RecipeUserListResource
-from resource.test import GitActionTestResource
 from resource.user import jwt_blocklist,UserDetailResource, UserLoginResource, UserLogoutResource, UserNicknameResetResource, UserPasswordResetResource, UserRegisterResource, UserResource
 
 app = Flask(__name__)
@@ -124,13 +123,8 @@ api.add_resource(DiceResource, '/game/dice/<int:subjectType_id>/<int:penaltyType
 api.add_resource(CheersResource, '/game/cheers')
 # api.add_resource(GPT3CHATBOTRESOURCE, '/game/chatbot')
 
-# 깃 액션 테스트용3
-api.add_resource(GitActionTestResource, '/test')
-
-
 if __name__ == '__main__': 
     app.debug = False
     app.run() # debug=True 는 개발할때만 사용해야함 # 배포할때는 False로 바꿔야함 
     # debug=True 는 코드를 수정하면, 서버를 재시작하지 않아도, 자동으로 코드가 반영됨
     # 디버그 모드를 사용하려면 set FLASK_ENV=development 를 cmd에 입력해야함
-
