@@ -11,6 +11,7 @@ from mysql_connection import get_connection
 from config import Config
 import random
 import pandas as pd
+import openai
 
 
 ## 오락실 페이지 ##
@@ -357,39 +358,39 @@ class DiceResource(Resource):
 
 
 # 심심이 - gpt3를 이용한
-# class GPT3CHATBOTRESOURCE(Resource):
-#     @jwt_required()
-#     def post(self) :
-#         data = request.get_json()
+class GPT3CHATBOTRESOURCE(Resource):
+    @jwt_required()
+    def post(self) :
+        data = request.get_json()
         
-#         try:
+        try:
 
-#             openai.api_key = Config.OPENAI_SECRET_KEY
-#             response = openai.Completion.create(
-#             model="text-davinci-003",
-#             prompt=data['question'],
-#             temperature=0.9,
-#             max_tokens=300,
-#             top_p=1,
-#             frequency_penalty=0,
-#             presence_penalty=0.6
-#             )
+            openai.api_key = Config.OPENAI_SECRET_KEY
+            response = openai.Completion.create(
+            model="text-davinci-003",
+            prompt=data['question'],
+            temperature=0.9,
+            max_tokens=300,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0.6
+            )
 
-#             generated_text = response.choices[0].text
-#             print(generated_text)
+            generated_text = response.choices[0].text
+            print(generated_text)
 
 
             
-#         except Error as e :
-#             print(e)
-#             return {'error' : str(e)}, 500
+        except Error as e :
+            print(e)
+            return {'error' : str(e)}, 500
         
-#         except ValueError as e :
-#             print(e)
-#             return {'error' : "다른 단어 또는 문장을 입력해주세요"}, 500
+        except ValueError as e :
+            print(e)
+            return {'error' : "다른 단어 또는 문장을 입력해주세요"}, 500
                 
-#         return {"result" : "success",
-#                 "answer": generated_text},200
+        return {"result" : "success",
+                "answer": generated_text},200
 
 
 
