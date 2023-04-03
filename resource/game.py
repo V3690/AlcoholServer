@@ -370,13 +370,14 @@ class GPT3CHATBOTRESOURCE(Resource):
             model="text-davinci-003",
             prompt=data['question'],
             temperature=0.9,
-            max_tokens=300,
+            max_tokens=500,
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0.6
             )
 
             generated_text = response.choices[0].text
+            generated_text = generated_text.lstrip("\n")
             print(generated_text)
 
 
