@@ -655,7 +655,7 @@ class AlcholLikeListSearchResource(Resource):
         try :
             connection = get_connection()
 
-            query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce, a.supply, count(l1.alcoholId) as cnt
+            query = '''select a.id, a.name ,a.percent,a.alcoholType, a.category, a.produce,a.imgUrl, a.supply, count(l1.alcoholId) as cnt
                         from alcohol a
                          left join likeAlcohol l1
                         on a.id = l1.alcoholId
